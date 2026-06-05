@@ -6,11 +6,19 @@ import { createContext, useContext, useState, useMemo, ReactNode } from "react"
 interface Folder {
   id: string
   name: string
+  type?: "folder" | "project"
+  description?: string
+  created?: string
+  createdBy?: string
 }
 
 interface Project {
   id: string
   name: string
+  type?: "folder" | "project"
+  description?: string
+  created?: string
+  createdBy?: string
 }
 
 interface Report {
@@ -34,11 +42,11 @@ interface ProjectWithCounts extends Project {
 
 interface ReportsContextType {
   folders: FolderWithCounts[]
-  addFolder: (name: string) => void
+  addFolder: (name: string, type?: "folder" | "project", description?: string) => void
   renameFolder: (oldName: string, newName: string) => void
   deleteFolder: (folderName: string) => void
   getProjectsForFolder: (folderName: string) => ProjectWithCounts[]
-  addProject: (folderName: string, projectName: string) => void
+  addProject: (folderName: string, projectName: string, type?: "folder" | "project", description?: string) => void
   renameProject: (folderName: string, oldName: string, newName: string) => void
   deleteProject: (folderName: string, projectName: string) => void
   getReportsForProject: (folderName: string, projectName: string) => Report[]
@@ -413,10 +421,15 @@ export function ReportsProvider({ children }: { children: ReactNode }) {
     })
   }, [folders, projects, reports])
 
-  const addFolder = (name: string) => {
+  const addFolder = (name: string, type: "folder" | "project" = "folder", description?: string) => {
+    const today = formatDate(new Date())
     const newFolder: Folder = {
       id: String(Date.now()),
       name: name.trim(),
+      type,
+      created: today,
+      createdBy: "John Doe",
+      ...(type === "project" ? { description: description?.trim() || undefined } : {}),
     }
     setFolders((prev) => [newFolder, ...prev])
   }
@@ -474,10 +487,15 @@ export function ReportsProvider({ children }: { children: ReactNode }) {
     })
   }
 
-  const addProject = (folderName: string, projectName: string) => {
+  const addProject = (folderName: string, projectName: string, type: "folder" | "project" = "project", description?: string) => {
+    const today = formatDate(new Date())
     const newProject: Project = {
       id: String(Date.now()),
       name: projectName.trim(),
+      type,
+      created: today,
+      createdBy: "John Doe",
+      ...(type === "project" ? { description: description?.trim() || undefined } : {}),
     }
     
     setProjects((prev) => ({
