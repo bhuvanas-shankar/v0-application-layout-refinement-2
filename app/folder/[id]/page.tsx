@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { Search, MoreVertical, ChevronLeft, ChevronRight, ChevronsUpDown, Files, Pencil, Trash2, FileSearch } from "lucide-react"
+import { Search, MoreVertical, ChevronLeft, ChevronRight, ChevronsUpDown, Files, Pencil, Trash2, FileSearch, Folder } from "lucide-react"
 import Link from "next/link"
 import {
   Table,
@@ -137,7 +137,8 @@ export default function FolderViewPage() {
       {/* Page Header - Sticky */}
       <div className="flex-shrink-0 p-6 pb-0">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-semibold text-foreground">
+          <h1 className="font-heading text-2xl font-semibold text-foreground flex items-center gap-2">
+            <Folder className="size-6 shrink-0 text-foreground" />
             {folderName}
           </h1>
           <Button onClick={() => setIsAddProjectOpen(true)}>

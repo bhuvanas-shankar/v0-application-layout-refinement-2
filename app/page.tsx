@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Search, FolderOpenDot, MoreVertical, ChevronLeft, ChevronRight, ChevronsUpDown, Pencil, Trash2, FolderOpen } from "lucide-react"
+import { Search, FolderOpenDot, MoreVertical, ChevronLeft, ChevronRight, ChevronsUpDown, Pencil, Trash2, FolderOpen, Folder } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -133,7 +133,8 @@ export default function AllReportsPage() {
       {/* Page Header - Sticky */}
       <div className="flex-shrink-0 p-6 pb-0">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-semibold text-foreground">
+          <h1 className="font-heading text-2xl font-semibold text-foreground flex items-center gap-2">
+            <Folder className="size-6 shrink-0 text-foreground" />
             All Reports
           </h1>
           <Button onClick={() => setIsAddItemOpen(true)}>

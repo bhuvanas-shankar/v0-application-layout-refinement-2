@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useParams, useSearchParams } from "next/navigation"
-import { Search, ChevronLeft, ChevronRight, ChevronsUpDown, File, FileSearch } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight, ChevronsUpDown, File, FileSearch, FolderOpen } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -180,7 +180,8 @@ export default function ProjectFolderViewPage() {
       {/* Page Header - Sticky */}
       <div className="flex-shrink-0 p-6 pb-0">
         <div className="mb-4 flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-semibold text-foreground">
+          <h1 className="font-heading text-2xl font-semibold text-foreground flex items-center gap-2">
+            <FolderOpen className="size-6 shrink-0 text-foreground" />
             {projectName}
           </h1>
           <Button variant="secondary" disabled className="opacity-50 cursor-not-allowed">
