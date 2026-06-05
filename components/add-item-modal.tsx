@@ -24,8 +24,8 @@ interface AddItemModalProps {
   allowedTypes?: ItemType[]
   /** Default selected type when the modal opens. */
   defaultType?: ItemType
-  /** Optional context label, e.g. the parent folder name. */
-  parentName?: string
+  /** Where the new item will be created, e.g. "All Reports" or a folder name. */
+  location: string
   onCreate: (args: { type: ItemType; name: string; description?: string }) => void
 }
 
@@ -47,7 +47,7 @@ export function AddItemModal({
   onOpenChange,
   allowedTypes = ["folder", "project"],
   defaultType,
-  parentName,
+  location,
   onCreate,
 }: AddItemModalProps) {
   const [type, setType] = useState<ItemType>(defaultType ?? allowedTypes[0])
@@ -144,15 +144,10 @@ export function AddItemModal({
               className="focus-visible:ring-[var(--quire-yellow)] focus-visible:border-[var(--quire-yellow)]"
               autoFocus
             />
-            {trimmedName ? (
-              <p className="text-sm text-muted-foreground">
-                {trimmedName} - {typeMeta[type].label}
-              </p>
-            ) : parentName ? (
-              <p className="text-sm text-muted-foreground">
-                This {typeMeta[type].label.toLowerCase()} will be created inside {parentName}.
-              </p>
-            ) : null}
+            {/* Dynamic helper text: e.g. "Folder will be added to All Reports" */}
+            <p className="text-sm text-muted-foreground">
+              {typeMeta[type].label} will be added to {location}
+            </p>
           </div>
 
           {/* Description field — projects only */}

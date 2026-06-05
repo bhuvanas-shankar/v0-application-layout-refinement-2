@@ -35,6 +35,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useReports } from "@/contexts/reports-context"
+import { AddItemModal, type ItemType } from "@/components/add-item-modal"
 
 type SortField = "name" | "projects" | "lastUpdated" | null
 type SortDirection = "asc" | "desc"
@@ -49,8 +50,7 @@ export default function AllReportsPage() {
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
   const [hoveredRow, setHoveredRow] = useState<string | null>(null)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
-  const [isAddFolderOpen, setIsAddFolderOpen] = useState(false)
-  const [newFolderName, setNewFolderName] = useState("")
+  const [isAddItemOpen, setIsAddItemOpen] = useState(false)
   const [isRenameOpen, setIsRenameOpen] = useState(false)
   const [renamingFolder, setRenamingFolder] = useState<{ id: string; name: string } | null>(null)
   const [renameValue, setRenameValue] = useState("")
@@ -102,13 +102,9 @@ export default function AllReportsPage() {
     setCurrentPage(1)
   }
 
-  const handleAddFolder = () => {
-    if (newFolderName.trim()) {
-      addFolder(newFolderName)
-      setCurrentPage(1)
-    }
-    setIsAddFolderOpen(false)
-    setNewFolderName("")
+  const handleAddItem = ({ type, name, description }: { type: ItemType; name: string; description?: string }) => {
+    addFolder(name, type, description)
+    setCurrentPage(1)
   }
 
   const handleRenameFolder = () => {
@@ -140,7 +136,7 @@ export default function AllReportsPage() {
           <h1 className="font-heading text-2xl font-semibold text-foreground">
             All Reports
           </h1>
-          <Button onClick={() => setIsAddFolderOpen(true)}>
+          <Button onClick={() => setIsAddItemOpen(true)}>
             Add Folder
           </Button>
         </div>
@@ -321,49 +317,15 @@ export default function AllReportsPage() {
         </div>
       </div>
 
-      {/* Add Folder Modal */}
-      <Dialog open={isAddFolderOpen} onOpenChange={setIsAddFolderOpen}>
-        <DialogContent showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle>Add Folder</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <Label htmlFor="folder-name" className="text-sm font-medium">
-              Name
-            </Label>
-            <Input
-              id="folder-name"
-              placeholder="Enter folder name..."
-              value={newFolderName}
-              onChange={(e) => setNewFolderName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && newFolderName.trim()) {
-                  handleAddFolder()
-                }
-              }}
-              className="mt-2 focus-visible:ring-[var(--quire-yellow)] focus-visible:border-[var(--quire-yellow)]"
-              autoFocus
-            />
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAddFolderOpen(false)
-                setNewFolderName("")
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAddFolder}
-              disabled={!newFolderName.trim()}
-            >
-              Add Folder
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Add Folder/Project Modal */}
+      <AddItemModal
+        open={isAddItemOpen}
+        onOpenChange={setIsAddItemOpen}
+        allowedTypes={["folder", "project"]}
+        defaultType="folder"
+        location="All Reports"
+        onCreate={handleAddItem}
+      />
 
       {/* Rename Folder Modal */}
       <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>

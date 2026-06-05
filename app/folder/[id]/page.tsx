@@ -36,6 +36,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { useReports } from "@/contexts/reports-context"
+import { AddItemModal, type ItemType } from "@/components/add-item-modal"
 
 type SortField = "name" | "reports" | "lastUpdated" | null
 type SortDirection = "asc" | "desc"
@@ -54,7 +55,6 @@ export default function FolderViewPage() {
   const [hoveredRow, setHoveredRow] = useState<string | null>(null)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [isAddProjectOpen, setIsAddProjectOpen] = useState(false)
-  const [newProjectName, setNewProjectName] = useState("")
   const [isRenameOpen, setIsRenameOpen] = useState(false)
   const [renamingProject, setRenamingProject] = useState<{ id: string; name: string } | null>(null)
   const [renameValue, setRenameValue] = useState("")
@@ -106,13 +106,9 @@ export default function FolderViewPage() {
     setCurrentPage(1)
   }
 
-  const handleAddProject = () => {
-    if (newProjectName.trim()) {
-      addProject(folderName, newProjectName)
-      setCurrentPage(1)
-    }
-    setIsAddProjectOpen(false)
-    setNewProjectName("")
+  const handleAddProject = ({ type, name, description }: { type: ItemType; name: string; description?: string }) => {
+    addProject(folderName, name, type, description)
+    setCurrentPage(1)
   }
 
   const handleRenameProject = () => {
@@ -326,51 +322,14 @@ export default function FolderViewPage() {
       </div>
 
       {/* Add Project Modal */}
-      <Dialog open={isAddProjectOpen} onOpenChange={setIsAddProjectOpen}>
-        <DialogContent showCloseButton={false}>
-          <DialogHeader>
-            <DialogTitle>Add Project</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <Label htmlFor="project-name" className="text-sm font-medium">
-              Name
-            </Label>
-            <Input
-              id="project-name"
-              placeholder="Enter project name..."
-              value={newProjectName}
-              onChange={(e) => setNewProjectName(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && newProjectName.trim()) {
-                  handleAddProject()
-                }
-              }}
-              className="mt-2 focus-visible:ring-[var(--quire-yellow)] focus-visible:border-[var(--quire-yellow)]"
-              autoFocus
-            />
-            <p className="mt-2 text-sm text-muted-foreground">
-              This project will be created inside {folderName}.
-            </p>
-          </div>
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => {
-                setIsAddProjectOpen(false)
-                setNewProjectName("")
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAddProject}
-              disabled={!newProjectName.trim()}
-            >
-              Add Project
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AddItemModal
+        open={isAddProjectOpen}
+        onOpenChange={setIsAddProjectOpen}
+        allowedTypes={["project"]}
+        defaultType="project"
+        location={folderName}
+        onCreate={handleAddProject}
+      />
 
       {/* Rename Project Modal */}
       <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
