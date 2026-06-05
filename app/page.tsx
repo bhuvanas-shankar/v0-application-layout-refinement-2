@@ -222,8 +222,8 @@ export default function AllReportsPage() {
                 >
                   <TableCell className="w-[50%] py-5 px-4 align-middle">
                     <div className="flex items-center gap-2">
-                      <FolderOpenDot className="size-5 text-[#378ADD] fill-[#378ADD]/10" />
-                      <span className="text-[#378ADD] font-medium hover:underline cursor-pointer">
+                      <FolderOpenDot className="size-5 text-quire-link fill-quire-link/10" />
+                      <span className="text-quire-link font-medium hover:underline cursor-pointer">
                         {folder.name}
                       </span>
                     </div>

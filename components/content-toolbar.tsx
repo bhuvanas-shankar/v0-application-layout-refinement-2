@@ -37,7 +37,7 @@ export function ContentToolbar() {
           <div className="flex items-center gap-1.5">
             <Link 
               href="/" 
-              className="text-sm text-[#378ADD] hover:underline"
+              className="text-sm text-quire-link hover:underline"
             >
               All reports
             </Link>
@@ -52,14 +52,14 @@ export function ContentToolbar() {
           <div className="flex items-center gap-1.5">
             <Link 
               href="/" 
-              className="text-sm text-[#378ADD] hover:underline"
+              className="text-sm text-quire-link hover:underline"
             >
               All reports
             </Link>
             <ChevronRight className="size-3.5 text-muted-foreground" />
             <Link 
               href={`/folder/${encodeURIComponent(folderName)}`}
-              className="text-sm text-[#378ADD] hover:underline"
+              className="text-sm text-quire-link hover:underline"
             >
               {folderName}
             </Link>

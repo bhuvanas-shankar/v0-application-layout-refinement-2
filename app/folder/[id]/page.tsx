@@ -226,8 +226,8 @@ export default function FolderViewPage() {
                   >
 <TableCell className="w-[50%] py-6 px-4 align-middle">
                       <div className="flex items-center gap-2">
-                        <Files className="size-5 text-[#378ADD]" />
-                        <span className="text-[#378ADD] font-medium hover:underline cursor-pointer">
+                        <Files className="size-5 text-quire-link" />
+                        <span className="text-quire-link font-medium hover:underline cursor-pointer">
                           {project.name}
                         </span>
                       </div>

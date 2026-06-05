@@ -15,6 +15,7 @@
   --quire-table-header: #EEF2FF;
   --quire-success: #43AA8B;
   --quire-black: #1A1A1A;
+  --quire-link: #378ADD;
 
   /* Core tokens */
   --background: #ffffff;
@@ -100,6 +101,7 @@
   --quire-chip-bg: #F0EFF7;
   --quire-table-header: #F5F4FA;
   --quire-black: #1A1A1A;
+  --quire-link: #378ADD;
 }
 
 @theme inline {
@@ -154,6 +156,7 @@
   --color-quire-table-header: var(--quire-table-header);
   --color-quire-success: var(--quire-success);
   --color-quire-black: var(--quire-black);
+  --color-quire-link: var(--quire-link);
 }
 
 @layer base {
