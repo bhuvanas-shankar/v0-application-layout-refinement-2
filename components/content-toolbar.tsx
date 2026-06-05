@@ -5,6 +5,11 @@ import Link from "next/link"
 import { ChevronRight } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 export function ContentToolbar() {
   const pathname = usePathname()
@@ -35,38 +40,63 @@ export function ContentToolbar() {
         {/* Breadcrumb zone - Level 2: Folder View */}
         {isFolderView && folderName && (
           <div className="flex items-center gap-1.5">
-            <Link 
-              href="/" 
-              className="text-sm text-quire-link hover:underline"
-            >
-              All reports
-            </Link>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link 
+                  href="/" 
+                  className="text-sm text-quire-link hover:underline"
+                >
+                  All reports
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>All reports - Folder</TooltipContent>
+            </Tooltip>
             <ChevronRight className="size-3.5 text-muted-foreground" />
-            <span className="text-sm font-medium text-foreground">
-              {folderName}
-            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-sm font-medium text-foreground">
+                  {folderName}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>{`${folderName} - Folder`}</TooltipContent>
+            </Tooltip>
           </div>
         )}
         {/* Breadcrumb zone - Level 3: Project Folder View */}
         {isProjectView && projectName && (
           <div className="flex items-center gap-1.5">
-            <Link 
-              href="/" 
-              className="text-sm text-quire-link hover:underline"
-            >
-              All reports
-            </Link>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link 
+                  href="/" 
+                  className="text-sm text-quire-link hover:underline"
+                >
+                  All reports
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>All reports - Folder</TooltipContent>
+            </Tooltip>
             <ChevronRight className="size-3.5 text-muted-foreground" />
-            <Link 
-              href={`/folder/${encodeURIComponent(folderName)}`}
-              className="text-sm text-quire-link hover:underline"
-            >
-              {folderName}
-            </Link>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Link 
+                  href={`/folder/${encodeURIComponent(folderName)}`}
+                  className="text-sm text-quire-link hover:underline"
+                >
+                  {folderName}
+                </Link>
+              </TooltipTrigger>
+              <TooltipContent>{`${folderName} - Folder`}</TooltipContent>
+            </Tooltip>
             <ChevronRight className="size-3.5 text-muted-foreground" />
-            <span className="text-sm font-medium text-foreground">
-              {projectName}
-            </span>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <span className="text-sm font-medium text-foreground">
+                  {projectName}
+                </span>
+              </TooltipTrigger>
+              <TooltipContent>{`${projectName} - Project`}</TooltipContent>
+            </Tooltip>
           </div>
         )}
       </div>
