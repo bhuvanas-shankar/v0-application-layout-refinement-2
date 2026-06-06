@@ -1,9 +1,21 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
 import { useRouter, useParams } from "next/navigation"
-import { Search, MoreVertical, ChevronLeft, ChevronRight, ChevronsUpDown, Files, Pencil, Trash2, FileSearch, Folder } from "lucide-react"
-import Link from "next/link"
+import {
+  Search,
+  Folder,
+  FolderOpen,
+  MoreVertical,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsUpDown,
+  ChevronUp,
+  ChevronDown,
+  Pencil,
+  Trash2,
+  Check,
+} from "lucide-react"
 import {
   Table,
   TableBody,
@@ -14,6 +26,8 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
+import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
@@ -35,64 +49,142 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useReports } from "@/contexts/reports-context"
-import { AddItemModal, type ItemType } from "@/components/add-item-modal"
+import { cn } from "@/lib/utils"
 
-type SortField = "name" | "reports" | "lastUpdated" | null
+type RowType = "folder" | "project"
+
+interface FolderRow {
+  id: string
+  name: string
+  type: RowType
+  items: number
+  lastUpdated: string
+  created: string
+  createdBy: string
+}
+
+type SortField = "name" | "lastUpdated"
 type SortDirection = "asc" | "desc"
+
+const SEED_ROWS: FolderRow[] = [
+  { id: "1", name: "Phase II ESA - Industrial Site A", type: "project", items: 30, lastUpdated: "Dec 18, 2015", created: "Jan 5, 2015", createdBy: "Amanda Foster" },
+  { id: "2", name: "Phase I ESA - 4400 Harbor Boulevard", type: "project", items: 6, lastUpdated: "Nov 14, 2015", created: "Mar 12, 2015", createdBy: "Rachel Green" },
+  { id: "3", name: "ESA Sub-folder 2014", type: "folder", items: 6, lastUpdated: "Nov 1, 2014", created: "Oct 14, 2014", createdBy: "Sarah Chen" },
+  { id: "4", name: "Phase I ESA - Oakwood Business Park", type: "project", items: 3, lastUpdated: "Oct 30, 2015", created: "Feb 4, 2015", createdBy: "Sarah Chen" },
+  { id: "5", name: "Phase I ESA - 1200 Riverside Drive", type: "project", items: 5, lastUpdated: "Oct 12, 2015", created: "Apr 18, 2015", createdBy: "Emily Watson" },
+  { id: "6", name: "Archived Projects 2014", type: "folder", items: 8, lastUpdated: "Oct 14, 2014", created: "Aug 18, 2014", createdBy: "Rachel Green" },
+  { id: "7", name: "Phase I ESA - Former Dry Cleaner Site", type: "project", items: 6, lastUpdated: "Sep 28, 2015", created: "Jan 22, 2015", createdBy: "James Liu" },
+  { id: "8", name: "Phase II ESA - Riverfront Redevelopment", type: "project", items: 8, lastUpdated: "Sep 10, 2015", created: "Jun 21, 2015", createdBy: "Rachel Green" },
+  { id: "9", name: "ESA Sub-folder 2013", type: "folder", items: 4, lastUpdated: "Oct 28, 2014", created: "Sep 3, 2013", createdBy: "Michael Torres" },
+  { id: "10", name: "Asbestos Survey - City Hall Annex", type: "project", items: 8, lastUpdated: "Aug 25, 2015", created: "Aug 22, 2015", createdBy: "Sarah Chen" },
+  { id: "11", name: "Asbestos Survey - Lincoln Elementary School", type: "project", items: 8, lastUpdated: "Aug 8, 2015", created: "Apr 17, 2015", createdBy: "James Liu" },
+  { id: "12", name: "Archived Projects 2013", type: "folder", items: 5, lastUpdated: "Sep 30, 2014", created: "Jul 2, 2013", createdBy: "Emily Watson" },
+  { id: "13", name: "Asbestos Survey - Harborview Community Center", type: "project", items: 5, lastUpdated: "Jul 22, 2015", created: "Feb 28, 2015", createdBy: "Michael Torres" },
+  { id: "14", name: "Lead Paint Assessment - 800 Commerce Street", type: "project", items: 4, lastUpdated: "Jul 6, 2015", created: "May 10, 2015", createdBy: "Emily Watson" },
+  { id: "15", name: "Lead Paint Assessment - Municipal Services Building", type: "project", items: 7, lastUpdated: "Jun 19, 2015", created: "Dec 18, 2014", createdBy: "Emily Watson" },
+  { id: "16", name: "Mold Assessment - Westfield Office Complex", type: "project", items: 8, lastUpdated: "Jun 3, 2015", created: "Apr 9, 2015", createdBy: "Michael Torres" },
+  { id: "17", name: "Soil Contamination Study - Mill Road Corridor", type: "project", items: 7, lastUpdated: "May 18, 2015", created: "Aug 4, 2015", createdBy: "Emily Watson" },
+  { id: "18", name: "Soil Contamination Study - East Industrial Depot", type: "project", items: 8, lastUpdated: "May 1, 2015", created: "May 4, 2015", createdBy: "Emily Watson" },
+  { id: "19", name: "Remediation Report - Bayside Manufacturing", type: "project", items: 8, lastUpdated: "Apr 15, 2015", created: "Feb 28, 2015", createdBy: "Rachel Green" },
+  { id: "20", name: "Remediation Report - North County Landfill", type: "project", items: 8, lastUpdated: "Mar 30, 2015", created: "Jan 6, 2015", createdBy: "David Kim" },
+  { id: "21", name: "Groundwater Monitoring - Eastside Plume", type: "project", items: 8, lastUpdated: "Mar 13, 2015", created: "May 1, 2015", createdBy: "Sarah Chen" },
+  { id: "22", name: "Groundwater Monitoring - Former Gas Station Network", type: "project", items: 4, lastUpdated: "Feb 25, 2015", created: "Nov 14, 2014", createdBy: "Amanda Foster" },
+  { id: "23", name: "Air Quality Monitoring - Port District Q1", type: "project", items: 8, lastUpdated: "Feb 9, 2015", created: "Dec 17, 2014", createdBy: "Emily Watson" },
+  { id: "24", name: "Air Quality Monitoring - Port District Q2", type: "project", items: 8, lastUpdated: "Jan 23, 2015", created: "Jun 17, 2014", createdBy: "James Liu" },
+  { id: "25", name: "Wetlands Delineation - Creekside Development", type: "project", items: 8, lastUpdated: "Jan 7, 2015", created: "Aug 24, 2014", createdBy: "James Liu" },
+  { id: "26", name: "Wetlands Delineation - Highway 9 Expansion Zone", type: "project", items: 6, lastUpdated: "Dec 18, 2014", created: "Jun 17, 2014", createdBy: "James Liu" },
+  { id: "27", name: "NEPA Review - Regional Transit Corridor", type: "project", items: 8, lastUpdated: "Dec 1, 2014", created: "Nov 20, 2014", createdBy: "David Kim" },
+  { id: "28", name: "Cultural Resources Survey - Old Town District", type: "project", items: 8, lastUpdated: "Nov 14, 2014", created: "Nov 20, 2014", createdBy: "David Kim" },
+]
+
+function SortIndicator({ active, direction }: { active: boolean; direction: SortDirection }) {
+  if (!active) {
+    return <ChevronsUpDown className="size-3 opacity-60" />
+  }
+  return direction === "asc" ? (
+    <ChevronUp className="size-3 text-[var(--quire-yellow)]" />
+  ) : (
+    <ChevronDown className="size-3 text-[var(--quire-yellow)]" />
+  )
+}
+
+type ItemType = "folder" | "project"
+
+const typeMeta: Record<ItemType, { label: string; description: string; icon: typeof Folder }> = {
+  folder: {
+    label: "Folder",
+    description: "Organizes projects and other folders",
+    icon: Folder,
+  },
+  project: {
+    label: "Project",
+    description: "Contains reports directly",
+    icon: FolderOpen,
+  },
+}
 
 export default function FolderViewPage() {
   const router = useRouter()
   const params = useParams()
   const folderName = decodeURIComponent(params.id as string)
-  const { getProjectsForFolder, addProject, renameProject, deleteProject } = useReports()
-  const projects = getProjectsForFolder(folderName)
+
+  const [rows, setRows] = useState<FolderRow[]>(SEED_ROWS)
   const [searchQuery, setSearchQuery] = useState("")
   const [rowsPerPage, setRowsPerPage] = useState(25)
   const [currentPage, setCurrentPage] = useState(1)
-  const [sortField, setSortField] = useState<SortField>(null)
+  const [sortField, setSortField] = useState<SortField | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
   const [hoveredRow, setHoveredRow] = useState<string | null>(null)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
-  const [isAddProjectOpen, setIsAddProjectOpen] = useState(false)
+  const [isAddOpen, setIsAddOpen] = useState(false)
   const [isRenameOpen, setIsRenameOpen] = useState(false)
-  const [renamingProject, setRenamingProject] = useState<{ id: string; name: string } | null>(null)
+  const [renamingRow, setRenamingRow] = useState<FolderRow | null>(null)
   const [renameValue, setRenameValue] = useState("")
 
-  // Filter projects based on search query
-  const filteredProjects = useMemo(() => {
-    return projects.filter((project) =>
-      project.name.toLowerCase().includes(searchQuery.toLowerCase())
-    )
-  }, [searchQuery, projects])
+  // Add modal local state
+  const [addType, setAddType] = useState<ItemType>("folder")
+  const [addName, setAddName] = useState("")
+  const [addDescription, setAddDescription] = useState("")
 
-  // Sort projects
-  const sortedProjects = useMemo(() => {
-    if (!sortField) return filteredProjects
-    return [...filteredProjects].sort((a, b) => {
+  useEffect(() => {
+    if (isAddOpen) {
+      setAddType("folder")
+      setAddName("")
+      setAddDescription("")
+    }
+  }, [isAddOpen])
+
+  // Filter rows by name (case-insensitive, real time)
+  const filteredRows = useMemo(() => {
+    return rows.filter((row) =>
+      row.name.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }, [searchQuery, rows])
+
+  // Sort rows — sort state persists across pages
+  const sortedRows = useMemo(() => {
+    if (!sortField) return filteredRows
+    return [...filteredRows].sort((a, b) => {
       let comparison = 0
       if (sortField === "name") {
         comparison = a.name.localeCompare(b.name)
-      } else if (sortField === "reports") {
-        comparison = a.reports - b.reports
       } else if (sortField === "lastUpdated") {
         comparison = new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime()
       }
       return sortDirection === "asc" ? comparison : -comparison
     })
-  }, [filteredProjects, sortField, sortDirection])
+  }, [filteredRows, sortField, sortDirection])
 
-  // Paginate projects
-  const paginatedProjects = useMemo(() => {
+  const paginatedRows = useMemo(() => {
     const startIndex = (currentPage - 1) * rowsPerPage
-    return sortedProjects.slice(startIndex, startIndex + rowsPerPage)
-  }, [sortedProjects, currentPage, rowsPerPage])
+    return sortedRows.slice(startIndex, startIndex + rowsPerPage)
+  }, [sortedRows, currentPage, rowsPerPage])
 
-  const totalPages = Math.ceil(sortedProjects.length / rowsPerPage)
-  const startItem = sortedProjects.length > 0 ? (currentPage - 1) * rowsPerPage + 1 : 0
-  const endItem = Math.min(currentPage * rowsPerPage, sortedProjects.length)
+  const totalPages = Math.ceil(sortedRows.length / rowsPerPage)
+  const startItem = sortedRows.length > 0 ? (currentPage - 1) * rowsPerPage + 1 : 0
+  const endItem = Math.min(currentPage * rowsPerPage, sortedRows.length)
 
-  const handleSort = (field: "name" | "reports" | "lastUpdated") => {
+  const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc")
     } else {
@@ -106,52 +198,73 @@ export default function FolderViewPage() {
     setCurrentPage(1)
   }
 
-  const handleAddProject = ({ type, name, description }: { type: ItemType; name: string; description?: string }) => {
-    addProject(folderName, name, type, description)
-    setCurrentPage(1)
+  const handleNavigate = (row: FolderRow) => {
+    if (row.type === "folder") {
+      router.push(`/folder/${encodeURIComponent(row.name)}`)
+    } else {
+      router.push(`/project/${encodeURIComponent(row.name)}?folder=${encodeURIComponent(folderName)}`)
+    }
   }
 
-  const handleRenameProject = () => {
-    if (renamingProject && renameValue.trim()) {
-      renameProject(folderName, renamingProject.name, renameValue)
+  const handleAddItem = () => {
+    const trimmed = addName.trim()
+    if (!trimmed) return
+    const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    const newRow: FolderRow = {
+      id: String(Date.now()),
+      name: trimmed,
+      type: addType,
+      items: 0,
+      lastUpdated: today,
+      created: today,
+      createdBy: "John Doe",
+    }
+    setRows((prev) => [newRow, ...prev])
+    setCurrentPage(1)
+    setIsAddOpen(false)
+  }
+
+  const handleRenameRow = () => {
+    if (renamingRow && renameValue.trim()) {
+      setRows((prev) =>
+        prev.map((row) => (row.id === renamingRow.id ? { ...row, name: renameValue.trim() } : row))
+      )
     }
     setIsRenameOpen(false)
-    setRenamingProject(null)
+    setRenamingRow(null)
     setRenameValue("")
   }
 
-  const handleDeleteProject = (projectName: string) => {
-    deleteProject(folderName, projectName)
+  const handleDeleteRow = (id: string) => {
+    setRows((prev) => prev.filter((row) => row.id !== id))
     setOpenMenuId(null)
   }
 
-  const openRenameModal = (project: { id: string; name: string }) => {
-    setRenamingProject(project)
-    setRenameValue(project.name)
+  const openRenameModal = (row: FolderRow) => {
+    setRenamingRow(row)
+    setRenameValue(row.name)
     setIsRenameOpen(true)
     setOpenMenuId(null)
   }
 
+  const addNameValid = addName.trim().length > 0
+
   return (
     <div className="flex flex-1 flex-col h-full overflow-hidden">
-      {/* Page Header - Sticky */}
-      <div className="flex-shrink-0 p-6 pb-0">
-        <div className="mb-4 flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-semibold text-foreground flex items-center gap-2">
+      {/* Content row: title + badge (left) + search (center) + Add (right) */}
+      <div className="flex-shrink-0 px-6 py-4">
+        <div className="flex items-center gap-4">
+          <h1 className="font-heading text-2xl font-semibold text-foreground flex items-center gap-2 min-w-0 flex-1">
             <Folder className="size-6 shrink-0 text-foreground" />
-            {folderName}
+            <span className="truncate">{folderName}</span>
+            <Badge className="ml-1 shrink-0 bg-quire-link/10 text-quire-link hover:bg-quire-link/10 border-transparent font-medium">
+              Folder
+            </Badge>
           </h1>
-          <Button onClick={() => setIsAddProjectOpen(true)}>
-            Add Project
-          </Button>
-        </div>
-
-        {/* Search Toolbar */}
-        <div className="mb-8">
-          <div className="relative w-[420px]">
+          <div className="relative w-[320px] flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
-              placeholder="Search projects..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value)
@@ -160,93 +273,118 @@ export default function FolderViewPage() {
               className="pl-9 focus-visible:ring-[var(--quire-yellow)] focus-visible:border-[var(--quire-yellow)]"
             />
           </div>
+          <Button className="flex-none" onClick={() => setIsAddOpen(true)}>
+            Add
+          </Button>
         </div>
       </div>
 
-      {/* Project Table with Sticky Header */}
+      {/* Table with sticky header */}
       <div className="flex-1 flex flex-col mx-6 mb-0 border border-border rounded-lg overflow-hidden bg-card shadow-sm">
-        {/* Fixed Table Header */}
         <Table className="table-fixed w-full flex-shrink-0">
           <TableHeader>
             <TableRow className="border-b border-[var(--quire-black)] bg-[var(--quire-black)] hover:bg-[var(--quire-black)]">
-              <TableHead 
-                className="w-[50%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
+              <TableHead
+                className="w-[28%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
                 onClick={() => handleSort("name")}
               >
                 <div className="flex items-center gap-1">
                   Name
-                  <ChevronsUpDown className="size-3 opacity-60" />
+                  <SortIndicator active={sortField === "name"} direction={sortDirection} />
                 </div>
               </TableHead>
-              <TableHead 
-                className="w-[20%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
-                onClick={() => handleSort("reports")}
-              >
-                <div className="flex items-center gap-1">
-                  Reports
-                  <ChevronsUpDown className="size-3 opacity-60" />
-                </div>
+              <TableHead className="w-[12%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 bg-[var(--quire-black)]">
+                Type
               </TableHead>
-              <TableHead 
-                className="w-[20%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
+              <TableHead className="w-[10%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 bg-[var(--quire-black)]">
+                Items
+              </TableHead>
+              <TableHead
+                className="w-[16%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
                 onClick={() => handleSort("lastUpdated")}
               >
                 <div className="flex items-center gap-1">
                   Last Updated
-                  <ChevronsUpDown className="size-3 opacity-60" />
+                  <SortIndicator active={sortField === "lastUpdated"} direction={sortDirection} />
                 </div>
               </TableHead>
-              <TableHead className="w-[10%] px-4 bg-[var(--quire-black)]"></TableHead>
+              <TableHead className="w-[14%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 bg-[var(--quire-black)]">
+                Created
+              </TableHead>
+              <TableHead className="w-[14%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 bg-[var(--quire-black)]">
+                Created By
+              </TableHead>
+              <TableHead className="w-[6%] px-4 bg-[var(--quire-black)]"></TableHead>
             </TableRow>
           </TableHeader>
         </Table>
 
-        {/* Scrollable Table Body */}
         <div className="flex-1 overflow-y-auto folder-list-scroll">
-          {sortedProjects.length === 0 ? (
+          {paginatedRows.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-16">
-              <FileSearch className="size-12 text-muted-foreground/50 mb-3" />
-              <span className="text-muted-foreground">No projects found</span>
+              <FolderOpen className="size-12 text-muted-foreground/50 mb-3" />
+              <span className="text-muted-foreground">Nothing here yet</span>
             </div>
           ) : (
             <Table className="table-fixed w-full">
               <TableBody>
-                {paginatedProjects.map((project, index) => (
+                {paginatedRows.map((row, index) => (
                   <TableRow
-                    key={project.id}
+                    key={row.id}
                     className={`border-border cursor-pointer transition-colors duration-150 ease-out hover:bg-[#EEEDF5] ${
                       index % 2 === 0 ? "bg-white" : "bg-[#F9F8FC]"
                     }`}
-                    onMouseEnter={() => setHoveredRow(project.id)}
+                    onMouseEnter={() => setHoveredRow(row.id)}
                     onMouseLeave={() => setHoveredRow(null)}
-                    onClick={() => router.push(`/project/${encodeURIComponent(project.name)}?folder=${encodeURIComponent(folderName)}`)}
+                    onClick={() => handleNavigate(row)}
                   >
-<TableCell className="w-[50%] py-6 px-4 align-middle">
+                    <TableCell className="w-[28%] py-5 px-4 align-middle">
                       <div className="flex items-center gap-2">
-                        <Files className="size-5 text-quire-link" />
-                        <span className="text-quire-link font-medium hover:underline cursor-pointer">
-                          {project.name}
+                        {row.type === "folder" ? (
+                          <Folder className="size-5 shrink-0 text-quire-link fill-quire-link/10" />
+                        ) : (
+                          <FolderOpen className="size-5 shrink-0 text-quire-link" />
+                        )}
+                        <span className="text-quire-link font-medium hover:underline cursor-pointer truncate">
+                          {row.name}
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="w-[20%] text-foreground text-sm align-middle py-6 pl-5 pr-4">
-                      {project.reports}
+                    <TableCell className="w-[12%] py-5 px-4 align-middle">
+                      {row.type === "folder" ? (
+                        <Badge className="bg-quire-link/10 text-quire-link hover:bg-quire-link/10 border-transparent font-medium">
+                          Folder
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-quire-success/10 text-quire-success hover:bg-quire-success/10 border-transparent font-medium">
+                          Project
+                        </Badge>
+                      )}
                     </TableCell>
-                    <TableCell className="w-[20%] text-muted-foreground text-sm align-middle py-6 pl-5 pr-4">
-                      {project.lastUpdated}
+                    <TableCell className="w-[10%] text-foreground text-sm align-middle py-5 px-4">
+                      {row.items}
                     </TableCell>
-                    <TableCell className="w-[10%] align-middle py-6 px-4">
+                    <TableCell className="w-[16%] text-muted-foreground text-sm align-middle py-5 px-4">
+                      {row.lastUpdated}
+                    </TableCell>
+                    <TableCell className="w-[14%] text-muted-foreground text-sm align-middle py-5 px-4">
+                      {row.created}
+                    </TableCell>
+                    <TableCell className="w-[14%] text-muted-foreground text-sm align-middle py-5 px-4 truncate">
+                      {row.createdBy}
+                    </TableCell>
+                    <TableCell className="w-[6%] align-middle py-5 px-4">
                       <div className="flex justify-end">
-                        <DropdownMenu 
-                          open={openMenuId === project.id} 
-                          onOpenChange={(open) => setOpenMenuId(open ? project.id : null)}
+                        <DropdownMenu
+                          open={openMenuId === row.id}
+                          onOpenChange={(open) => setOpenMenuId(open ? row.id : null)}
                         >
                           <DropdownMenuTrigger asChild>
                             <Button
                               variant="ghost"
                               size="icon-sm"
                               className={`text-muted-foreground hover:text-foreground ${
-                                hoveredRow === project.id || openMenuId === project.id ? "opacity-100" : "opacity-0"
+                                hoveredRow === row.id || openMenuId === row.id ? "opacity-100" : "opacity-0"
                               }`}
                               onClick={(e) => e.stopPropagation()}
                             >
@@ -254,14 +392,14 @@ export default function FolderViewPage() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                            <DropdownMenuItem onClick={() => openRenameModal(project)}>
+                            <DropdownMenuItem onClick={() => openRenameModal(row)}>
                               <Pencil className="size-4" />
                               Rename
                             </DropdownMenuItem>
-                            {project.reports === 0 && (
-                              <DropdownMenuItem 
+                            {row.items === 0 && (
+                              <DropdownMenuItem
                                 variant="destructive"
-                                onClick={() => handleDeleteProject(project.name)}
+                                onClick={() => handleDeleteRow(row.id)}
                               >
                                 <Trash2 className="size-4" />
                                 Delete
@@ -279,7 +417,7 @@ export default function FolderViewPage() {
         </div>
       </div>
 
-      {/* Pagination - Sticky at bottom */}
+      {/* Pagination */}
       <div className="flex-shrink-0 p-6 pt-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Rows per page</span>
@@ -296,7 +434,7 @@ export default function FolderViewPage() {
         </div>
 
         <span className="text-sm text-muted-foreground">
-          {sortedProjects.length > 0 ? `${startItem}–${endItem} of ${sortedProjects.length}` : "0 of 0"}
+          {sortedRows.length > 0 ? `${startItem}–${endItem} of ${sortedRows.length}` : "0 of 0"}
         </span>
 
         <div className="flex items-center gap-1">
@@ -322,34 +460,120 @@ export default function FolderViewPage() {
         </div>
       </div>
 
-      {/* Add Project Modal */}
-      <AddItemModal
-        open={isAddProjectOpen}
-        onOpenChange={setIsAddProjectOpen}
-        allowedTypes={["project"]}
-        defaultType="project"
-        location={folderName}
-        onCreate={handleAddProject}
-      />
+      {/* Add new Modal */}
+      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
+        <DialogContent showCloseButton={false} className="sm:max-w-[480px]">
+          <DialogHeader>
+            <DialogTitle>Add new</DialogTitle>
+          </DialogHeader>
 
-      {/* Rename Project Modal */}
+          <div className="space-y-5 py-2">
+            {/* Type selector cards — stacked vertically */}
+            <div className="space-y-2">
+              {(["folder", "project"] as ItemType[]).map((t) => {
+                const meta = typeMeta[t]
+                const Icon = meta.icon
+                const selected = addType === t
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setAddType(t)}
+                    className={cn(
+                      "relative flex w-full items-center gap-3 rounded-lg p-4 text-left transition-colors",
+                      selected
+                        ? "border-2 border-[var(--quire-black)] bg-muted/50"
+                        : "border-[0.5px] border-border hover:bg-muted/30",
+                    )}
+                    aria-pressed={selected}
+                  >
+                    <Icon className="size-6 shrink-0 text-foreground" />
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-sm font-medium text-foreground">{meta.label}</span>
+                      <span className="block text-xs text-muted-foreground">{meta.description}</span>
+                    </span>
+                    {/* Radio indicator top right */}
+                    <span
+                      className={cn(
+                        "flex size-4 shrink-0 items-center justify-center rounded-full border",
+                        selected ? "border-[var(--quire-black)] bg-[var(--quire-black)]" : "border-border",
+                      )}
+                    >
+                      {selected && <Check className="size-2.5 text-white" />}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+
+            {/* Name field */}
+            <div className="space-y-2">
+              <Label htmlFor="add-name" className="text-sm font-medium">
+                Name
+              </Label>
+              <Input
+                id="add-name"
+                placeholder="Enter a name..."
+                value={addName}
+                onChange={(e) => setAddName(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && addNameValid) handleAddItem()
+                }}
+                className="focus-visible:ring-[var(--quire-yellow)] focus-visible:border-[var(--quire-yellow)]"
+                autoFocus
+              />
+              <p className="text-sm text-muted-foreground">
+                {typeMeta[addType].label} will be added to {folderName}
+              </p>
+            </div>
+
+            {/* Description field — projects only */}
+            {addType === "project" && (
+              <div className="space-y-2">
+                <Label htmlFor="add-description" className="text-sm font-medium">
+                  Description
+                </Label>
+                <Textarea
+                  id="add-description"
+                  placeholder="Enter a description..."
+                  value={addDescription}
+                  onChange={(e) => setAddDescription(e.target.value)}
+                  rows={3}
+                  className="resize-none focus-visible:ring-[var(--quire-yellow)] focus-visible:border-[var(--quire-yellow)]"
+                />
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsAddOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleAddItem} disabled={!addNameValid}>
+              Add
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Rename Modal */}
       <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Rename Project</DialogTitle>
+            <DialogTitle>Rename</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <Label htmlFor="rename-project" className="text-sm font-medium">
+            <Label htmlFor="rename-item" className="text-sm font-medium">
               Name
             </Label>
             <Input
-              id="rename-project"
-              placeholder="Enter project name..."
+              id="rename-item"
+              placeholder="Enter a name..."
               value={renameValue}
               onChange={(e) => setRenameValue(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && renameValue.trim()) {
-                  handleRenameProject()
+                  handleRenameRow()
                 }
               }}
               className="mt-2 focus-visible:ring-[var(--quire-yellow)] focus-visible:border-[var(--quire-yellow)]"
@@ -361,16 +585,13 @@ export default function FolderViewPage() {
               variant="outline"
               onClick={() => {
                 setIsRenameOpen(false)
-                setRenamingProject(null)
+                setRenamingRow(null)
                 setRenameValue("")
               }}
             >
               Cancel
             </Button>
-            <Button
-              onClick={handleRenameProject}
-              disabled={!renameValue.trim()}
-            >
+            <Button onClick={handleRenameRow} disabled={!renameValue.trim()}>
               Rename
             </Button>
           </DialogFooter>
