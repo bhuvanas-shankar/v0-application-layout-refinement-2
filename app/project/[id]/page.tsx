@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useParams, useSearchParams } from "next/navigation"
-import { Search, ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown, FileText, FileSearch, FolderOpen } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown, FileText, FileSearch, FolderOpen, X } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -215,8 +215,21 @@ export default function ProjectFolderViewPage() {
                 setSearchQuery(e.target.value)
                 setCurrentPage(1)
               }}
-              className="pl-9 focus-visible:ring-[var(--quire-yellow)] focus-visible:border-[var(--quire-yellow)]"
+              className="pl-9 pr-9 focus-visible:ring-[var(--quire-yellow)] focus-visible:border-[var(--quire-yellow)]"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                aria-label="Clear search"
+                onClick={() => {
+                  setSearchQuery("")
+                  setCurrentPage(1)
+                }}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="size-4" />
+              </button>
+            )}
           </div>
 
           {/* Middle right: status filter */}
