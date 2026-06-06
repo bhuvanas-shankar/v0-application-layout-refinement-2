@@ -2,7 +2,7 @@
 
 import { usePathname, useSearchParams } from "next/navigation"
 import Link from "next/link"
-import { ChevronRight, Folder } from "lucide-react"
+import { ChevronRight, Folder, FolderOpen } from "lucide-react"
 import { SidebarTrigger } from "@/components/ui/sidebar"
 import { Separator } from "@/components/ui/separator"
 import {
@@ -68,35 +68,38 @@ export function ContentToolbar() {
         )}
         {/* Breadcrumb zone - Level 3: Project Folder View */}
         {isProjectView && projectName && (
-          <div className="flex items-center gap-1.5">
+          <div className="flex items-center gap-1.5 min-w-0">
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link 
                   href="/" 
-                  className="text-sm text-quire-link hover:underline"
+                  className="flex items-center gap-1.5 text-sm text-quire-link hover:underline"
                 >
+                  <Folder className="size-3.5 shrink-0" />
                   All reports
                 </Link>
               </TooltipTrigger>
               <TooltipContent>All reports - Folder</TooltipContent>
             </Tooltip>
-            <ChevronRight className="size-3.5 text-muted-foreground" />
+            <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
             <Tooltip>
               <TooltipTrigger asChild>
                 <Link 
                   href={`/folder/${encodeURIComponent(folderName)}`}
-                  className="text-sm text-quire-link hover:underline"
+                  className="flex items-center gap-1.5 min-w-0 text-sm text-quire-link hover:underline"
                 >
-                  {folderName}
+                  <Folder className="size-3.5 shrink-0" />
+                  <span className="truncate">{folderName}</span>
                 </Link>
               </TooltipTrigger>
               <TooltipContent>{`${folderName} - Folder`}</TooltipContent>
             </Tooltip>
-            <ChevronRight className="size-3.5 text-muted-foreground" />
+            <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
             <Tooltip>
               <TooltipTrigger asChild>
-                <span className="text-sm font-medium text-foreground">
-                  {projectName}
+                <span className="flex items-center gap-1.5 min-w-0 text-sm font-medium text-foreground">
+                  <FolderOpen className="size-3.5 shrink-0" />
+                  <span className="truncate">{projectName}</span>
                 </span>
               </TooltipTrigger>
               <TooltipContent>{`${projectName} - Project`}</TooltipContent>

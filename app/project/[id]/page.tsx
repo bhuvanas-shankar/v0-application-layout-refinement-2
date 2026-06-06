@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useParams, useSearchParams } from "next/navigation"
-import { Search, ChevronLeft, ChevronRight, ChevronsUpDown, File, FileSearch, FolderOpen } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown, File, FileSearch, FolderOpen } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -21,6 +21,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+import { Badge } from "@/components/ui/badge"
 import { useReports } from "@/contexts/reports-context"
 
 type SortField = "name" | "status" | "complete" | "lastModified" | "modifiedBy" | null
@@ -101,6 +102,18 @@ function getInitials(name: string) {
     .toUpperCase()
 }
 
+// Three-state sort indicator: default up-down, or single arrow in Quire yellow when active
+function SortIndicator({ active, direction }: { active: boolean; direction: SortDirection }) {
+  if (!active) {
+    return <ChevronsUpDown className="size-3 opacity-60" />
+  }
+  return direction === "asc" ? (
+    <ChevronUp className="size-3 text-[var(--quire-yellow)]" />
+  ) : (
+    <ChevronDown className="size-3 text-[var(--quire-yellow)]" />
+  )
+}
+
 export default function ProjectFolderViewPage() {
   const params = useParams()
   const searchParams = useSearchParams()
@@ -179,19 +192,21 @@ export default function ProjectFolderViewPage() {
     <div className="flex flex-1 flex-col h-full overflow-hidden">
       {/* Page Header - Sticky */}
       <div className="flex-shrink-0 p-6 pb-0">
-        <div className="mb-4 flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-semibold text-foreground flex items-center gap-2">
-            <FolderOpen className="size-6 shrink-0 text-foreground" />
-            {projectName}
-          </h1>
-          <Button variant="secondary" disabled className="opacity-50 cursor-not-allowed">
-            New Report
-          </Button>
-        </div>
-
-        {/* Toolbar Row */}
+        {/* Content row — single horizontal row */}
         <div className="mb-8 flex items-center gap-4">
-          <div className="relative w-[420px]">
+          {/* Left: icon + title + Project badge */}
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <FolderOpen className="size-6 shrink-0 text-foreground" />
+            <h1 className="font-heading text-2xl font-semibold text-foreground truncate">
+              {projectName}
+            </h1>
+            <Badge className="ml-1 shrink-0 bg-quire-success/10 text-quire-success hover:bg-quire-success/10 border-transparent font-medium">
+              Project
+            </Badge>
+          </div>
+
+          {/* Middle left: search input */}
+          <div className="relative w-[280px] shrink-0">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
               placeholder="Search reports..."
@@ -203,8 +218,10 @@ export default function ProjectFolderViewPage() {
               className="pl-9 focus-visible:ring-[var(--quire-yellow)] focus-visible:border-[var(--quire-yellow)]"
             />
           </div>
+
+          {/* Middle right: status filter */}
           <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-            <SelectTrigger className="w-[160px]">
+            <SelectTrigger className="w-[160px] shrink-0">
               <SelectValue placeholder="All statuses" />
             </SelectTrigger>
             <SelectContent>
@@ -215,6 +232,11 @@ export default function ProjectFolderViewPage() {
               <SelectItem value="Final">Final</SelectItem>
             </SelectContent>
           </Select>
+
+          {/* Right: disabled Add Report button */}
+          <Button disabled className="w-[130px] shrink-0 opacity-50 cursor-not-allowed">
+            Add Report
+          </Button>
         </div>
       </div>
 
@@ -230,7 +252,7 @@ export default function ProjectFolderViewPage() {
               >
                 <div className="flex items-center gap-1">
                   Report Name
-                  <ChevronsUpDown className="size-3 opacity-60" />
+                  <SortIndicator active={sortField === "name"} direction={sortDirection} />
                 </div>
               </TableHead>
               <TableHead 
@@ -239,7 +261,7 @@ export default function ProjectFolderViewPage() {
               >
                 <div className="flex items-center gap-1">
                   Status
-                  <ChevronsUpDown className="size-3 opacity-60" />
+                  <SortIndicator active={sortField === "status"} direction={sortDirection} />
                 </div>
               </TableHead>
               <TableHead 
@@ -248,7 +270,7 @@ export default function ProjectFolderViewPage() {
               >
                 <div className="flex items-center gap-1">
                   Complete
-                  <ChevronsUpDown className="size-3 opacity-60" />
+                  <SortIndicator active={sortField === "complete"} direction={sortDirection} />
                 </div>
               </TableHead>
               <TableHead 
@@ -257,7 +279,7 @@ export default function ProjectFolderViewPage() {
               >
                 <div className="flex items-center gap-1">
                   Last Modified
-                  <ChevronsUpDown className="size-3 opacity-60" />
+                  <SortIndicator active={sortField === "lastModified"} direction={sortDirection} />
                 </div>
               </TableHead>
               <TableHead 
@@ -266,7 +288,7 @@ export default function ProjectFolderViewPage() {
               >
                 <div className="flex items-center gap-1">
                   Modified By
-                  <ChevronsUpDown className="size-3 opacity-60" />
+                  <SortIndicator active={sortField === "modifiedBy"} direction={sortDirection} />
                 </div>
               </TableHead>
             </TableRow>
