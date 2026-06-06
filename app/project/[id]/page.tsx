@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useParams, useSearchParams } from "next/navigation"
-import { Search, ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown, File, FileSearch, FolderOpen } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown, FileText, FileSearch, FolderOpen } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -314,7 +314,7 @@ export default function ProjectFolderViewPage() {
                   >
                     <TableCell className="w-[35%] py-5 px-4 align-middle">
                       <div className="flex items-center gap-2">
-                        <File className="size-5 text-quire-link" />
+                        <FileText className="size-5 text-quire-link" />
                         <span className="text-quire-link font-medium hover:underline cursor-pointer">
                           {report.name}
                         </span>
