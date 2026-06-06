@@ -26,6 +26,7 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Select,
   SelectContent,
@@ -94,6 +95,36 @@ const SEED_ROWS: FolderRow[] = [
   { id: "27", name: "NEPA Review - Regional Transit Corridor", type: "project", items: 8, lastUpdated: "Dec 1, 2014", created: "Nov 20, 2014", createdBy: "David Kim" },
   { id: "28", name: "Cultural Resources Survey - Old Town District", type: "project", items: 8, lastUpdated: "Nov 14, 2014", created: "Nov 20, 2014", createdBy: "David Kim" },
 ]
+
+// Avatar color schemes using Quire design tokens with optimal contrast
+const avatarColors: Array<{ bg: string; text: string }> = [
+  { bg: "bg-[#221A4E]", text: "text-white" },           // quire-navy - white text
+  { bg: "bg-[#43AA8B]", text: "text-white" },           // quire-success - white text
+  { bg: "bg-[#FFC146]", text: "text-[#221A4E]" },       // quire-yellow - navy text
+  { bg: "bg-[#6E6790]", text: "text-white" },           // quire-muted - white text
+  { bg: "bg-[#378ADD]", text: "text-white" },           // blue accent - white text
+  { bg: "bg-[#2D2460]", text: "text-white" },           // quire-navy-light - white text
+  { bg: "bg-[#E05C5C]", text: "text-white" },           // destructive red - white text
+]
+
+// Deterministic hash so each person always maps to the same color
+function getAvatarColor(name: string): { bg: string; text: string } {
+  let hash = 0
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  const index = Math.abs(hash) % avatarColors.length
+  return avatarColors[index]
+}
+
+// Get initials from a person's name
+function getInitials(name: string) {
+  return name
+    .split(" ")
+    .map((n) => n[0])
+    .join("")
+    .toUpperCase()
+}
 
 function SortIndicator({ active, direction }: { active: boolean; direction: SortDirection }) {
   if (!active) {
@@ -340,8 +371,20 @@ export default function FolderViewPage() {
                     <TableCell className="w-[14%] text-muted-foreground text-sm align-middle py-5 px-4">
                       {row.created}
                     </TableCell>
-                    <TableCell className="w-[14%] text-muted-foreground text-sm align-middle py-5 px-4 truncate">
-                      {row.createdBy}
+                    <TableCell className="w-[14%] text-muted-foreground text-sm align-middle py-5 px-4">
+                      {(() => {
+                        const colors = getAvatarColor(row.createdBy)
+                        return (
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Avatar className="size-6 shrink-0">
+                              <AvatarFallback className={`text-[10px] font-medium ${colors.bg} ${colors.text}`}>
+                                {getInitials(row.createdBy)}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="truncate">{row.createdBy}</span>
+                          </div>
+                        )
+                      })()}
                     </TableCell>
                     <TableCell className="w-[6%] align-middle py-5 px-4">
                       <div className="flex justify-end">
