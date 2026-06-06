@@ -81,50 +81,47 @@ export function AddItemModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton={false} className="sm:max-w-[480px]">
         <DialogHeader>
-          <DialogTitle>Add {showTypeChooser ? "Item" : typeMeta[type].label}</DialogTitle>
+          <DialogTitle>Add new</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-5 py-2">
-          {/* Type chooser cards */}
+          {/* Type selector cards — stacked vertically */}
           {showTypeChooser && (
             <div className="space-y-2">
-              <Label className="text-sm font-medium">Type</Label>
-              <div className="grid grid-cols-2 gap-3">
-                {allowedTypes.map((t) => {
-                  const meta = typeMeta[t]
-                  const Icon = meta.icon
-                  const selected = type === t
-                  return (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => setType(t)}
+              {allowedTypes.map((t) => {
+                const meta = typeMeta[t]
+                const Icon = meta.icon
+                const selected = type === t
+                return (
+                  <button
+                    key={t}
+                    type="button"
+                    onClick={() => setType(t)}
+                    className={cn(
+                      "relative flex w-full items-center gap-3 rounded-lg p-4 text-left transition-colors",
+                      selected
+                        ? "border-2 border-[var(--quire-black)] bg-muted/50"
+                        : "border-[0.5px] border-border hover:bg-muted/30",
+                    )}
+                    aria-pressed={selected}
+                  >
+                    <Icon className="size-6 shrink-0 text-foreground" />
+                    <span className="flex-1 min-w-0">
+                      <span className="block text-sm font-medium text-foreground">{meta.label}</span>
+                      <span className="block text-xs text-muted-foreground">{meta.description}</span>
+                    </span>
+                    {/* Radio indicator */}
+                    <span
                       className={cn(
-                        "relative flex flex-col items-center gap-2 rounded-lg border p-4 text-center transition-colors",
-                        selected
-                          ? "border-primary bg-primary/5"
-                          : "border-border hover:border-primary/40 hover:bg-muted/50",
+                        "flex size-4 shrink-0 items-center justify-center rounded-full border",
+                        selected ? "border-[var(--quire-black)] bg-[var(--quire-black)]" : "border-border",
                       )}
-                      aria-pressed={selected}
                     >
-                      {/* Centered radio indicator */}
-                      <span
-                        className={cn(
-                          "absolute right-2 top-2 flex size-4 items-center justify-center rounded-full border",
-                          selected ? "border-primary bg-primary" : "border-border",
-                        )}
-                      >
-                        {selected && <Check className="size-2.5 text-primary-foreground" />}
-                      </span>
-                      <Icon className="size-6 text-primary" />
-                      <span className="text-sm font-medium text-foreground">{meta.label}</span>
-                      <span className="text-xs text-muted-foreground leading-snug">
-                        {meta.description}
-                      </span>
-                    </button>
-                  )
-                })}
-              </div>
+                      {selected && <Check className="size-2.5 text-white" />}
+                    </span>
+                  </button>
+                )
+              })}
             </div>
           )}
 
@@ -135,7 +132,7 @@ export function AddItemModal({
             </Label>
             <Input
               id="item-name"
-              placeholder={`Enter ${typeMeta[type].label.toLowerCase()} name...`}
+              placeholder="Enter a name..."
               value={name}
               onChange={(e) => setName(e.target.value)}
               onKeyDown={(e) => {
@@ -155,11 +152,10 @@ export function AddItemModal({
             <div className="space-y-2">
               <Label htmlFor="item-description" className="text-sm font-medium">
                 Description
-                <span className="ml-1 font-normal text-muted-foreground">(optional)</span>
               </Label>
               <Textarea
                 id="item-description"
-                placeholder="Add a short description..."
+                placeholder="Enter a description..."
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 rows={3}
@@ -174,7 +170,7 @@ export function AddItemModal({
             Cancel
           </Button>
           <Button onClick={handleCreate} disabled={!isValid}>
-            Add {typeMeta[type].label}
+            Add
           </Button>
         </DialogFooter>
       </DialogContent>
