@@ -59,26 +59,26 @@ function getAvatarColor(name: string): { bg: string; text: string } {
 
 // Completion arc component
 function CompletionArc({ percent }: { percent: number }) {
-  const radius = 11
+  const radius = 13
   const circumference = 2 * Math.PI * radius
   const strokeDashoffset = circumference - (percent / 100) * circumference
   const isComplete = percent === 100
   const strokeColor = isComplete ? "var(--quire-success)" : "var(--quire-yellow)"
 
   return (
-    <div className="relative flex items-center justify-center size-7">
-      <svg width="28" height="28" viewBox="0 0 28 28" className="-rotate-90">
+    <div className="relative flex items-center justify-center size-8">
+      <svg width="32" height="32" viewBox="0 0 32 32" className="-rotate-90">
         <circle
-          cx="14"
-          cy="14"
+          cx="16"
+          cy="16"
           r={radius}
           fill="none"
           stroke="#E5E7EB"
           strokeWidth="3"
         />
         <circle
-          cx="14"
-          cy="14"
+          cx="16"
+          cy="16"
           r={radius}
           fill="none"
           stroke={strokeColor}
@@ -88,7 +88,7 @@ function CompletionArc({ percent }: { percent: number }) {
           strokeDashoffset={strokeDashoffset}
         />
       </svg>
-      <span className="absolute text-[9px] font-medium text-foreground">{percent}</span>
+      <span className="absolute text-[10px] font-medium text-foreground">{percent}</span>
     </div>
   )
 }
