@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useMemo, ReactNode } from "react"
+import { createContext, useContext, useState, useMemo, useCallback, ReactNode } from "react"
 
 // Types
 interface Folder {
@@ -40,6 +40,14 @@ interface ProjectWithCounts extends Project {
   lastUpdated: string
 }
 
+// Persisted sort state so a user's sort selection survives navigation between pages.
+// Keyed by a view identifier (e.g. "all-reports", "folder:2015 Reports").
+type SortDirection = "asc" | "desc"
+interface SortState {
+  field: string | null
+  direction: SortDirection
+}
+
 interface ReportsContextType {
   folders: FolderWithCounts[]
   addFolder: (name: string, type?: "folder" | "project", description?: string) => void
@@ -51,6 +59,8 @@ interface ReportsContextType {
   deleteProject: (folderName: string, projectName: string) => void
   getReportsForProject: (folderName: string, projectName: string) => Report[]
   addReport: (folderName: string, projectName: string, reportName: string) => void
+  getSort: (key: string) => SortState
+  setSort: (key: string, field: string | null, direction: SortDirection) => void
 }
 
 // Initial seed data - 32 folders (just name and id)
@@ -575,6 +585,18 @@ export function ReportsProvider({ children }: { children: ReactNode }) {
     }))
   }
 
+  // Persisted, per-view sort state
+  const [sortByKey, setSortByKey] = useState<Record<string, SortState>>({})
+
+  const getSort = useCallback(
+    (key: string): SortState => sortByKey[key] ?? { field: null, direction: "asc" },
+    [sortByKey],
+  )
+
+  const setSort = useCallback((key: string, field: string | null, direction: SortDirection) => {
+    setSortByKey((prev) => ({ ...prev, [key]: { field, direction } }))
+  }, [])
+
   return (
     <ReportsContext.Provider value={{ 
       folders: foldersWithCounts, 
@@ -587,6 +609,8 @@ export function ReportsProvider({ children }: { children: ReactNode }) {
       deleteProject,
       getReportsForProject,
       addReport,
+      getSort,
+      setSort,
     }}>
       {children}
     </ReportsContext.Provider>

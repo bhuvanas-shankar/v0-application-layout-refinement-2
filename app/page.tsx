@@ -50,6 +50,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { AddItemModal, type ItemType } from "@/components/add-item-modal"
+import { useReports } from "@/contexts/reports-context"
 
 type RowType = "folder" | "project"
 
@@ -63,7 +64,7 @@ interface ReportRow {
   createdBy: string
 }
 
-type SortField = "name" | "lastUpdated"
+type SortField = "name" | "lastUpdated" | "created"
 type SortDirection = "asc" | "desc"
 
 const SEED_ROWS: ReportRow[] = [
@@ -144,12 +145,14 @@ function SortIndicator({ active, direction }: { active: boolean; direction: Sort
 
 export default function AllReportsPage() {
   const router = useRouter()
+  const { getSort, setSort } = useReports()
   const [rows, setRows] = useState<ReportRow[]>(SEED_ROWS)
   const [searchQuery, setSearchQuery] = useState("")
   const [rowsPerPage, setRowsPerPage] = useState(25)
   const [currentPage, setCurrentPage] = useState(1)
-  const [sortField, setSortField] = useState<SortField | null>(null)
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
+  // Sort state is read from the shared context so it persists across navigation
+  const { field: sortFieldRaw, direction: sortDirection } = getSort("all-reports")
+  const sortField = sortFieldRaw as SortField | null
   const [hoveredRow, setHoveredRow] = useState<string | null>(null)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [isAddItemOpen, setIsAddItemOpen] = useState(false)
@@ -173,6 +176,8 @@ export default function AllReportsPage() {
         comparison = a.name.localeCompare(b.name)
       } else if (sortField === "lastUpdated") {
         comparison = new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime()
+      } else if (sortField === "created") {
+        comparison = new Date(a.created).getTime() - new Date(b.created).getTime()
       }
       return sortDirection === "asc" ? comparison : -comparison
     })
@@ -189,10 +194,9 @@ export default function AllReportsPage() {
 
   const handleSort = (field: SortField) => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+      setSort("all-reports", field, sortDirection === "asc" ? "desc" : "asc")
     } else {
-      setSortField(field)
-      setSortDirection("asc")
+      setSort("all-reports", field, "asc")
     }
   }
 
@@ -315,8 +319,14 @@ export default function AllReportsPage() {
                   <SortIndicator active={sortField === "lastUpdated"} direction={sortDirection} />
                 </div>
               </TableHead>
-              <TableHead className="w-[14%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 bg-[var(--quire-black)]">
-                Created
+              <TableHead
+                className="w-[14%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
+                onClick={() => handleSort("created")}
+              >
+                <div className="flex items-center gap-1">
+                  Created
+                  <SortIndicator active={sortField === "created"} direction={sortDirection} />
+                </div>
               </TableHead>
               <TableHead className="w-[14%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 bg-[var(--quire-black)]">
                 Created By

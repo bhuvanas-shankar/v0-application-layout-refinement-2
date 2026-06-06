@@ -120,15 +120,17 @@ export default function ProjectFolderViewPage() {
   const projectName = decodeURIComponent(params.id as string)
   const folderName = searchParams.get("folder") ? decodeURIComponent(searchParams.get("folder") as string) : "2015 Reports"
   
-  const { getReportsForProject } = useReports()
+  const { getReportsForProject, getSort, setSort } = useReports()
   const reports = getReportsForProject(folderName, projectName)
+  const sortKey = `project:${folderName}/${projectName}`
   
   const [searchQuery, setSearchQuery] = useState("")
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all")
   const [rowsPerPage, setRowsPerPage] = useState(25)
   const [currentPage, setCurrentPage] = useState(1)
-  const [sortField, setSortField] = useState<SortField>(null)
-  const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
+  // Sort state is read from the shared context so it persists across navigation
+  const { field: sortFieldRaw, direction: sortDirection } = getSort(sortKey)
+  const sortField = sortFieldRaw as SortField
 
   // Filter reports based on search query and status
   const filteredReports = useMemo(() => {
@@ -171,10 +173,9 @@ export default function ProjectFolderViewPage() {
 
   const handleSort = (field: "name" | "status" | "complete" | "lastModified" | "modifiedBy") => {
     if (sortField === field) {
-      setSortDirection(sortDirection === "asc" ? "desc" : "asc")
+      setSort(sortKey, field, sortDirection === "asc" ? "desc" : "asc")
     } else {
-      setSortField(field)
-      setSortDirection("asc")
+      setSort(sortKey, field, "asc")
     }
   }
 
@@ -268,23 +269,11 @@ export default function ProjectFolderViewPage() {
                   <SortIndicator active={sortField === "name"} direction={sortDirection} />
                 </div>
               </TableHead>
-              <TableHead 
-                className="w-[12%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
-                onClick={() => handleSort("status")}
-              >
-                <div className="flex items-center gap-1">
-                  Status
-                  <SortIndicator active={sortField === "status"} direction={sortDirection} />
-                </div>
+              <TableHead className="w-[12%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 bg-[var(--quire-black)]">
+                Status
               </TableHead>
-              <TableHead 
-                className="w-[12%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
-                onClick={() => handleSort("complete")}
-              >
-                <div className="flex items-center gap-1">
-                  Complete
-                  <SortIndicator active={sortField === "complete"} direction={sortDirection} />
-                </div>
+              <TableHead className="w-[12%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 bg-[var(--quire-black)]">
+                Complete
               </TableHead>
               <TableHead 
                 className="w-[18%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
@@ -295,14 +284,8 @@ export default function ProjectFolderViewPage() {
                   <SortIndicator active={sortField === "lastModified"} direction={sortDirection} />
                 </div>
               </TableHead>
-              <TableHead 
-                className="w-[23%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
-                onClick={() => handleSort("modifiedBy")}
-              >
-                <div className="flex items-center gap-1">
-                  Modified By
-                  <SortIndicator active={sortField === "modifiedBy"} direction={sortDirection} />
-                </div>
+              <TableHead className="w-[23%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 bg-[var(--quire-black)]">
+                Modified By
               </TableHead>
             </TableRow>
           </TableHeader>

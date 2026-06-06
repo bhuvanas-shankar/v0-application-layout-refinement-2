@@ -80,19 +80,23 @@ export function ContentToolbar() {
               <TooltipContent>All reports</TooltipContent>
             </Tooltip>
             <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Link 
-                  href={`/folder/${encodeURIComponent(folderName)}`}
-                  className="flex items-center gap-1.5 min-w-0 text-sm text-quire-link hover:underline"
-                >
-                  <Folder className="size-3.5 shrink-0" />
-                  <span className="truncate">{folderName}</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent>{`${folderName} - Folder`}</TooltipContent>
-            </Tooltip>
-            <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
+            {folderName && (
+              <>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Link 
+                      href={`/folder/${encodeURIComponent(folderName)}`}
+                      className="flex items-center gap-1.5 min-w-0 text-sm text-quire-link hover:underline"
+                    >
+                      <Folder className="size-3.5 shrink-0" />
+                      <span className="truncate">{folderName}</span>
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent>{`${folderName} - Folder`}</TooltipContent>
+                </Tooltip>
+                <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
+              </>
+            )}
             <Tooltip>
               <TooltipTrigger asChild>
                 <span className="flex items-center gap-1.5 min-w-0 text-sm font-medium text-foreground">
