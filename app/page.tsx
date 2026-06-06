@@ -2,7 +2,19 @@
 
 import { useState, useMemo } from "react"
 import { useRouter } from "next/navigation"
-import { Search, FolderOpenDot, MoreVertical, ChevronLeft, ChevronRight, ChevronsUpDown, Pencil, Trash2, FolderOpen, Folder } from "lucide-react"
+import {
+  Search,
+  Folder,
+  FolderOpen,
+  MoreVertical,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsUpDown,
+  ChevronUp,
+  ChevronDown,
+  Pencil,
+  Trash2,
+} from "lucide-react"
 import {
   Table,
   TableBody,
@@ -13,6 +25,7 @@ import {
 } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
@@ -34,61 +47,115 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { useReports } from "@/contexts/reports-context"
 import { AddItemModal, type ItemType } from "@/components/add-item-modal"
 
-type SortField = "name" | "projects" | "lastUpdated" | null
+type RowType = "folder" | "project"
+
+interface ReportRow {
+  id: string
+  name: string
+  type: RowType
+  items: number
+  lastUpdated: string
+  created: string
+  createdBy: string
+}
+
+type SortField = "name" | "lastUpdated"
 type SortDirection = "asc" | "desc"
+
+const SEED_ROWS: ReportRow[] = [
+  { id: "1", name: "Brownfield Redevelopment - Site 4", type: "project", items: 8, lastUpdated: "Jan 15, 2026", created: "Mar 3, 2020", createdBy: "Sarah Chen" },
+  { id: "2", name: "2015 Reports", type: "folder", items: 28, lastUpdated: "Jan 22, 2016", created: "Jun 14, 2014", createdBy: "Rachel Green" },
+  { id: "3", name: "2016 Reports", type: "folder", items: 12, lastUpdated: "Jan 28, 2017", created: "Apr 11, 2016", createdBy: "Emily Watson" },
+  { id: "4", name: "Former Rail Yard Assessment", type: "project", items: 12, lastUpdated: "Dec 2, 2025", created: "Jun 14, 2019", createdBy: "Michael Torres" },
+  { id: "5", name: "2017 Reports", type: "folder", items: 8, lastUpdated: "Jan 23, 2018", created: "Jun 12, 2014", createdBy: "Amanda Foster" },
+  { id: "6", name: "2018 Reports", type: "folder", items: 6, lastUpdated: "Jan 4, 2019", created: "Apr 9, 2017", createdBy: "Michael Torres" },
+  { id: "7", name: "Coastal Wetlands Restoration Project", type: "project", items: 5, lastUpdated: "Nov 18, 2025", created: "Sep 22, 2021", createdBy: "James Liu" },
+  { id: "8", name: "2019 Reports", type: "folder", items: 7, lastUpdated: "Jan 12, 2020", created: "Jun 10, 2015", createdBy: "James Liu" },
+  { id: "9", name: "2020 Reports", type: "folder", items: 5, lastUpdated: "Dec 5, 2020", created: "Jan 8, 2018", createdBy: "Sarah Chen" },
+  { id: "10", name: "2021 Reports", type: "folder", items: 9, lastUpdated: "Jan 20, 2022", created: "Mar 9, 2016", createdBy: "Michael Torres" },
+  { id: "11", name: "2022 Reports", type: "folder", items: 7, lastUpdated: "Jan 18, 2023", created: "May 10, 2014", createdBy: "James Liu" },
+  { id: "12", name: "2023 Reports", type: "folder", items: 8, lastUpdated: "Jan 7, 2024", created: "Nov 3, 2022", createdBy: "James Liu" },
+  { id: "13", name: "2024 Reports", type: "folder", items: 6, lastUpdated: "Dec 22, 2024", created: "Jan 4, 2020", createdBy: "Emily Watson" },
+  { id: "14", name: "2025 Reports", type: "folder", items: 3, lastUpdated: "Dec 8, 2025", created: "Mar 5, 2018", createdBy: "Amanda Foster" },
+  { id: "15", name: "2026 Reports", type: "folder", items: 2, lastUpdated: "Mar 1, 2026", created: "Jan 10, 2024", createdBy: "Sarah Chen" },
+  { id: "16", name: "Deep Dive Training Folder", type: "folder", items: 8, lastUpdated: "Mar 22, 2025", created: "Feb 14, 2019", createdBy: "Michael Torres" },
+  { id: "17", name: "Demo Folder", type: "folder", items: 12, lastUpdated: "Feb 28, 2025", created: "Aug 3, 2017", createdBy: "Rachel Green" },
+  { id: "18", name: "ESA Portfolio", type: "folder", items: 9, lastUpdated: "Dec 1, 2024", created: "May 6, 2016", createdBy: "Emily Watson" },
+  { id: "19", name: "Phase I Inspections", type: "folder", items: 14, lastUpdated: "Nov 10, 2024", created: "Sep 18, 2015", createdBy: "James Liu" },
+  { id: "20", name: "Asbestos Surveys", type: "folder", items: 6, lastUpdated: "Oct 5, 2024", created: "Mar 22, 2016", createdBy: "Sarah Chen" },
+  { id: "21", name: "Phase II Investigations", type: "folder", items: 7, lastUpdated: "Sep 18, 2024", created: "Jul 4, 2015", createdBy: "Amanda Foster" },
+  { id: "22", name: "Soil Contamination Studies", type: "folder", items: 5, lastUpdated: "Aug 3, 2024", created: "Dec 9, 2016", createdBy: "Michael Torres" },
+  { id: "23", name: "Hazmat Assessments", type: "folder", items: 3, lastUpdated: "Jul 22, 2024", created: "Apr 17, 2015", createdBy: "Rachel Green" },
+  { id: "24", name: "NEPA Reviews", type: "folder", items: 5, lastUpdated: "Feb 20, 2024", created: "Oct 2, 2014", createdBy: "Emily Watson" },
+  { id: "25", name: "Wetlands Delineation", type: "folder", items: 3, lastUpdated: "Jan 8, 2024", created: "Jun 28, 2015", createdBy: "James Liu" },
+  { id: "26", name: "Stormwater Management", type: "folder", items: 7, lastUpdated: "Dec 15, 2023", created: "Feb 11, 2016", createdBy: "Sarah Chen" },
+  { id: "27", name: "Cultural Resources", type: "folder", items: 4, lastUpdated: "Nov 2, 2023", created: "Aug 14, 2014", createdBy: "Amanda Foster" },
+  { id: "28", name: "Noise Impact Studies", type: "folder", items: 2, lastUpdated: "Oct 19, 2023", created: "Mar 30, 2017", createdBy: "Michael Torres" },
+  { id: "29", name: "Traffic Impact Assessments", type: "folder", items: 6, lastUpdated: "Sep 7, 2023", created: "Nov 5, 2015", createdBy: "Rachel Green" },
+  { id: "30", name: "Geotechnical Reports", type: "folder", items: 11, lastUpdated: "Aug 24, 2023", created: "Jan 19, 2016", createdBy: "Emily Watson" },
+  { id: "31", name: "Air Quality Reports", type: "folder", items: 6, lastUpdated: "Apr 11, 2024", created: "Jul 7, 2014", createdBy: "James Liu" },
+  { id: "32", name: "Remediation Projects", type: "folder", items: 9, lastUpdated: "Mar 5, 2024", created: "Sep 22, 2015", createdBy: "Sarah Chen" },
+]
+
+function SortIndicator({ active, direction }: { active: boolean; direction: SortDirection }) {
+  if (!active) {
+    return <ChevronsUpDown className="size-3 opacity-60" />
+  }
+  return direction === "asc" ? (
+    <ChevronUp className="size-3 text-[var(--quire-yellow)]" />
+  ) : (
+    <ChevronDown className="size-3 text-[var(--quire-yellow)]" />
+  )
+}
 
 export default function AllReportsPage() {
   const router = useRouter()
-  const { folders, addFolder, renameFolder, deleteFolder } = useReports()
+  const [rows, setRows] = useState<ReportRow[]>(SEED_ROWS)
   const [searchQuery, setSearchQuery] = useState("")
   const [rowsPerPage, setRowsPerPage] = useState(25)
   const [currentPage, setCurrentPage] = useState(1)
-  const [sortField, setSortField] = useState<SortField>(null)
+  const [sortField, setSortField] = useState<SortField | null>(null)
   const [sortDirection, setSortDirection] = useState<SortDirection>("asc")
   const [hoveredRow, setHoveredRow] = useState<string | null>(null)
   const [openMenuId, setOpenMenuId] = useState<string | null>(null)
   const [isAddItemOpen, setIsAddItemOpen] = useState(false)
   const [isRenameOpen, setIsRenameOpen] = useState(false)
-  const [renamingFolder, setRenamingFolder] = useState<{ id: string; name: string } | null>(null)
+  const [renamingRow, setRenamingRow] = useState<ReportRow | null>(null)
   const [renameValue, setRenameValue] = useState("")
 
-  // Filter folders based on search query
-  const filteredFolders = useMemo(() => {
-    return folders.filter((folder) =>
-      folder.name.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter rows by name (case-insensitive, real time)
+  const filteredRows = useMemo(() => {
+    return rows.filter((row) =>
+      row.name.toLowerCase().includes(searchQuery.toLowerCase())
     )
-  }, [searchQuery, folders])
+  }, [searchQuery, rows])
 
-  // Sort folders
-  const sortedFolders = useMemo(() => {
-    if (!sortField) return filteredFolders
-    return [...filteredFolders].sort((a, b) => {
+  // Sort rows — sort state persists across pages
+  const sortedRows = useMemo(() => {
+    if (!sortField) return filteredRows
+    return [...filteredRows].sort((a, b) => {
       let comparison = 0
       if (sortField === "name") {
         comparison = a.name.localeCompare(b.name)
-      } else if (sortField === "projects") {
-        comparison = a.projects - b.projects
       } else if (sortField === "lastUpdated") {
         comparison = new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime()
       }
       return sortDirection === "asc" ? comparison : -comparison
     })
-  }, [filteredFolders, sortField, sortDirection])
+  }, [filteredRows, sortField, sortDirection])
 
-  // Paginate folders
-  const paginatedFolders = useMemo(() => {
+  const paginatedRows = useMemo(() => {
     const startIndex = (currentPage - 1) * rowsPerPage
-    return sortedFolders.slice(startIndex, startIndex + rowsPerPage)
-  }, [sortedFolders, currentPage, rowsPerPage])
+    return sortedRows.slice(startIndex, startIndex + rowsPerPage)
+  }, [sortedRows, currentPage, rowsPerPage])
 
-  const totalPages = Math.ceil(sortedFolders.length / rowsPerPage)
+  const totalPages = Math.ceil(sortedRows.length / rowsPerPage)
   const startItem = (currentPage - 1) * rowsPerPage + 1
-  const endItem = Math.min(currentPage * rowsPerPage, sortedFolders.length)
+  const endItem = Math.min(currentPage * rowsPerPage, sortedRows.length)
 
-  const handleSort = (field: "name" | "projects" | "lastUpdated") => {
+  const handleSort = (field: SortField) => {
     if (sortField === field) {
       setSortDirection(sortDirection === "asc" ? "desc" : "asc")
     } else {
@@ -102,52 +169,65 @@ export default function AllReportsPage() {
     setCurrentPage(1)
   }
 
-  const handleAddItem = ({ type, name, description }: { type: ItemType; name: string; description?: string }) => {
-    addFolder(name, type, description)
+  const handleNavigate = (row: ReportRow) => {
+    if (row.type === "folder") {
+      router.push(`/folder/${encodeURIComponent(row.name)}`)
+    } else {
+      router.push(`/project/${encodeURIComponent(row.name)}`)
+    }
+  }
+
+  const handleAddItem = ({ type, name }: { type: ItemType; name: string; description?: string }) => {
+    const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
+    const newRow: ReportRow = {
+      id: String(Date.now()),
+      name: name.trim(),
+      type,
+      items: 0,
+      lastUpdated: today,
+      created: today,
+      createdBy: "John Doe",
+    }
+    setRows((prev) => [newRow, ...prev])
     setCurrentPage(1)
   }
 
-  const handleRenameFolder = () => {
-    if (renamingFolder && renameValue.trim()) {
-      renameFolder(renamingFolder.name, renameValue)
+  const handleRenameRow = () => {
+    if (renamingRow && renameValue.trim()) {
+      setRows((prev) =>
+        prev.map((row) => (row.id === renamingRow.id ? { ...row, name: renameValue.trim() } : row))
+      )
     }
     setIsRenameOpen(false)
-    setRenamingFolder(null)
+    setRenamingRow(null)
     setRenameValue("")
   }
 
-  const handleDeleteFolder = (folderName: string) => {
-    deleteFolder(folderName)
+  const handleDeleteRow = (id: string) => {
+    setRows((prev) => prev.filter((row) => row.id !== id))
     setOpenMenuId(null)
   }
 
-  const openRenameModal = (folder: { id: string; name: string }) => {
-    setRenamingFolder(folder)
-    setRenameValue(folder.name)
+  const openRenameModal = (row: ReportRow) => {
+    setRenamingRow(row)
+    setRenameValue(row.name)
     setIsRenameOpen(true)
     setOpenMenuId(null)
   }
 
   return (
     <div className="flex flex-1 flex-col h-full overflow-hidden">
-      {/* Page Header - Sticky */}
-      <div className="flex-shrink-0 p-6 pb-0">
-        <div className="mb-4 flex items-center justify-between">
-          <h1 className="font-heading text-2xl font-semibold text-foreground flex items-center gap-2">
+      {/* Content row: title (left) + search (center) + Add (right) */}
+      <div className="flex-shrink-0 px-6 py-4">
+        <div className="flex items-center gap-4">
+          <h1 className="font-heading text-2xl font-semibold text-foreground flex items-center gap-2 min-w-0 flex-1">
             <Folder className="size-6 shrink-0 text-foreground" />
-            All Reports
+            <span className="truncate">All Reports</span>
           </h1>
-          <Button onClick={() => setIsAddItemOpen(true)}>
-            Add Folder
-          </Button>
-        </div>
-
-        {/* Search Toolbar */}
-        <div className="mb-8">
-          <div className="relative w-[420px]">
+          <div className="relative w-[320px] flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
-              placeholder="Search folders..."
+              placeholder="Search..."
               value={searchQuery}
               onChange={(e) => {
                 setSearchQuery(e.target.value)
@@ -156,126 +236,151 @@ export default function AllReportsPage() {
               className="pl-9 focus-visible:ring-[var(--quire-yellow)] focus-visible:border-[var(--quire-yellow)]"
             />
           </div>
+          <Button className="flex-none" onClick={() => setIsAddItemOpen(true)}>
+            Add
+          </Button>
         </div>
       </div>
 
-      {/* Folder Table with Sticky Header */}
+      {/* Table with sticky header */}
       <div className="flex-1 flex flex-col mx-6 mb-0 border border-border rounded-lg overflow-hidden bg-card shadow-sm">
-        {/* Fixed Table Header */}
         <Table className="table-fixed w-full flex-shrink-0">
           <TableHeader>
             <TableRow className="border-b border-[var(--quire-black)] bg-[var(--quire-black)] hover:bg-[var(--quire-black)]">
-              <TableHead 
-                className="w-[50%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
+              <TableHead
+                className="w-[28%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
                 onClick={() => handleSort("name")}
               >
                 <div className="flex items-center gap-1">
                   Name
-                  <ChevronsUpDown className="size-3 opacity-60" />
+                  <SortIndicator active={sortField === "name"} direction={sortDirection} />
                 </div>
               </TableHead>
-              <TableHead 
-                className="w-[20%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
-                onClick={() => handleSort("projects")}
-              >
-                <div className="flex items-center gap-1">
-                  Projects
-                  <ChevronsUpDown className="size-3 opacity-60" />
-                </div>
+              <TableHead className="w-[12%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 bg-[var(--quire-black)]">
+                Type
               </TableHead>
-              <TableHead 
-                className="w-[20%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
+              <TableHead className="w-[10%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 bg-[var(--quire-black)]">
+                Items
+              </TableHead>
+              <TableHead
+                className="w-[16%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 cursor-pointer select-none bg-[var(--quire-black)]"
                 onClick={() => handleSort("lastUpdated")}
               >
                 <div className="flex items-center gap-1">
                   Last Updated
-                  <ChevronsUpDown className="size-3 opacity-60" />
+                  <SortIndicator active={sortField === "lastUpdated"} direction={sortDirection} />
                 </div>
               </TableHead>
-              <TableHead className="w-[10%] px-4 bg-[var(--quire-black)]"></TableHead>
+              <TableHead className="w-[14%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 bg-[var(--quire-black)]">
+                Created
+              </TableHead>
+              <TableHead className="w-[14%] text-white text-xs font-semibold uppercase tracking-wide py-3 px-4 bg-[var(--quire-black)]">
+                Created By
+              </TableHead>
+              <TableHead className="w-[6%] px-4 bg-[var(--quire-black)]"></TableHead>
             </TableRow>
           </TableHeader>
         </Table>
 
-        {/* Scrollable Table Body */}
         <div className="flex-1 overflow-y-auto folder-list-scroll">
-          {paginatedFolders.length === 0 ? (
+          {paginatedRows.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-16">
               <FolderOpen className="size-12 text-muted-foreground/50 mb-3" />
-              <span className="text-muted-foreground">No folders found</span>
+              <span className="text-muted-foreground">Nothing here yet</span>
             </div>
           ) : (
-          <Table className="table-fixed w-full">
-            <TableBody>
-              {paginatedFolders.map((folder, index) => (
-                <TableRow
-                  key={folder.id}
-                  className={`border-border cursor-pointer transition-colors duration-150 ease-out hover:bg-[#EEEDF5] ${
-                    index % 2 === 0 ? "bg-white" : "bg-[#F9F8FC]"
-                  }`}
-                  onMouseEnter={() => setHoveredRow(folder.id)}
-                  onMouseLeave={() => setHoveredRow(null)}
-                  onClick={() => router.push(`/folder/${encodeURIComponent(folder.name)}`)}
-                >
-                  <TableCell className="w-[50%] py-5 px-4 align-middle">
-                    <div className="flex items-center gap-2">
-                      <FolderOpenDot className="size-5 text-quire-link fill-quire-link/10" />
-                      <span className="text-quire-link font-medium hover:underline cursor-pointer">
-                        {folder.name}
-                      </span>
-                    </div>
-                  </TableCell>
-                  <TableCell className="w-[20%] text-foreground text-sm align-middle py-5 pl-5 pr-4">
-                    {folder.projects}
-                  </TableCell>
-                  <TableCell className="w-[20%] text-muted-foreground text-sm align-middle py-5 pl-5 pr-4">
-                    {folder.lastUpdated}
-                  </TableCell>
-                  <TableCell className="w-[10%] align-middle py-5 px-4">
-                    <div className="flex justify-end">
-                      <DropdownMenu 
-                        open={openMenuId === folder.id} 
-                        onOpenChange={(open) => setOpenMenuId(open ? folder.id : null)}
-                      >
-                        <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="icon-sm"
-                            className={`text-muted-foreground hover:text-foreground ${
-                              hoveredRow === folder.id || openMenuId === folder.id ? "opacity-100" : "opacity-0"
-                            }`}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <MoreVertical className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
-                          <DropdownMenuItem onClick={() => openRenameModal(folder)}>
-                            <Pencil className="size-4" />
-                            Rename
-                          </DropdownMenuItem>
-                          {folder.projects === 0 && (
-                            <DropdownMenuItem 
-                              variant="destructive"
-                              onClick={() => handleDeleteFolder(folder.name)}
+            <Table className="table-fixed w-full">
+              <TableBody>
+                {paginatedRows.map((row, index) => (
+                  <TableRow
+                    key={row.id}
+                    className={`border-border cursor-pointer transition-colors duration-150 ease-out hover:bg-[#EEEDF5] ${
+                      index % 2 === 0 ? "bg-white" : "bg-[#F9F8FC]"
+                    }`}
+                    onMouseEnter={() => setHoveredRow(row.id)}
+                    onMouseLeave={() => setHoveredRow(null)}
+                    onClick={() => handleNavigate(row)}
+                  >
+                    <TableCell className="w-[28%] py-5 px-4 align-middle">
+                      <div className="flex items-center gap-2">
+                        {row.type === "folder" ? (
+                          <Folder className="size-5 shrink-0 text-quire-link fill-quire-link/10" />
+                        ) : (
+                          <FolderOpen className="size-5 shrink-0 text-quire-link" />
+                        )}
+                        <span className="text-quire-link font-medium hover:underline cursor-pointer truncate">
+                          {row.name}
+                        </span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="w-[12%] py-5 px-4 align-middle">
+                      {row.type === "folder" ? (
+                        <Badge className="bg-quire-link/10 text-quire-link hover:bg-quire-link/10 border-transparent font-medium">
+                          Folder
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-quire-success/10 text-quire-success hover:bg-quire-success/10 border-transparent font-medium">
+                          Project
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="w-[10%] text-foreground text-sm align-middle py-5 px-4">
+                      {row.items}
+                    </TableCell>
+                    <TableCell className="w-[16%] text-muted-foreground text-sm align-middle py-5 px-4">
+                      {row.lastUpdated}
+                    </TableCell>
+                    <TableCell className="w-[14%] text-muted-foreground text-sm align-middle py-5 px-4">
+                      {row.created}
+                    </TableCell>
+                    <TableCell className="w-[14%] text-muted-foreground text-sm align-middle py-5 px-4 truncate">
+                      {row.createdBy}
+                    </TableCell>
+                    <TableCell className="w-[6%] align-middle py-5 px-4">
+                      <div className="flex justify-end">
+                        <DropdownMenu
+                          open={openMenuId === row.id}
+                          onOpenChange={(open) => setOpenMenuId(open ? row.id : null)}
+                        >
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon-sm"
+                              className={`text-muted-foreground hover:text-foreground ${
+                                hoveredRow === row.id || openMenuId === row.id ? "opacity-100" : "opacity-0"
+                              }`}
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              <Trash2 className="size-4" />
-                              Delete
+                              <MoreVertical className="size-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenuItem onClick={() => openRenameModal(row)}>
+                              <Pencil className="size-4" />
+                              Rename
                             </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+                            {row.items === 0 && (
+                              <DropdownMenuItem
+                                variant="destructive"
+                                onClick={() => handleDeleteRow(row.id)}
+                              >
+                                <Trash2 className="size-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </div>
       </div>
 
-      {/* Pagination - Sticky at bottom */}
+      {/* Pagination */}
       <div className="flex-shrink-0 p-6 pt-4 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted-foreground">Rows per page</span>
@@ -292,7 +397,7 @@ export default function AllReportsPage() {
         </div>
 
         <span className="text-sm text-muted-foreground">
-          {sortedFolders.length > 0 ? `${startItem}–${endItem} of ${sortedFolders.length}` : "0 of 0"}
+          {sortedRows.length > 0 ? `${startItem}–${endItem} of ${sortedRows.length}` : "0 of 0"}
         </span>
 
         <div className="flex items-center gap-1">
@@ -328,24 +433,24 @@ export default function AllReportsPage() {
         onCreate={handleAddItem}
       />
 
-      {/* Rename Folder Modal */}
+      {/* Rename Modal */}
       <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
-            <DialogTitle>Rename Folder</DialogTitle>
+            <DialogTitle>Rename</DialogTitle>
           </DialogHeader>
           <div className="py-4">
-            <Label htmlFor="rename-folder" className="text-sm font-medium">
+            <Label htmlFor="rename-row" className="text-sm font-medium">
               Name
             </Label>
             <Input
-              id="rename-folder"
-              placeholder="Enter folder name..."
+              id="rename-row"
+              placeholder="Enter name..."
               value={renameValue}
               onChange={(e) => setRenameValue(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && renameValue.trim()) {
-                  handleRenameFolder()
+                  handleRenameRow()
                 }
               }}
               className="mt-2 focus-visible:ring-[var(--quire-yellow)] focus-visible:border-[var(--quire-yellow)]"
@@ -357,16 +462,13 @@ export default function AllReportsPage() {
               variant="outline"
               onClick={() => {
                 setIsRenameOpen(false)
-                setRenamingFolder(null)
+                setRenamingRow(null)
                 setRenameValue("")
               }}
             >
               Cancel
             </Button>
-            <Button
-              onClick={handleRenameFolder}
-              disabled={!renameValue.trim()}
-            >
+            <Button onClick={handleRenameRow} disabled={!renameValue.trim()}>
               Rename
             </Button>
           </DialogFooter>

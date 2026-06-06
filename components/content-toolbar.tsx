@@ -32,11 +32,13 @@ export function ContentToolbar() {
     : ""
 
   return (
-    <div className="flex h-12 items-center border-b border-border bg-card px-3">
+    <div className="flex h-10 items-center border-b border-border bg-card px-3">
       {/* Left side: Toggle + divider + breadcrumb zone */}
       <div className="flex items-center gap-3">
-        <SidebarTrigger className="text-foreground border border-border hover:bg-muted transition-colors duration-200 ease-out" />
-        <Separator orientation="vertical" className="h-5 bg-border" />
+        <SidebarTrigger className="size-6 text-foreground border border-border hover:bg-muted transition-colors duration-200 ease-out [&>svg]:size-3.5" />
+        {(isFolderView || isProjectView) && (
+          <Separator orientation="vertical" className="h-5 bg-border" />
+        )}
         {/* Breadcrumb zone - Level 2: Folder View */}
         {isFolderView && folderName && (
           <div className="flex items-center gap-1.5">
