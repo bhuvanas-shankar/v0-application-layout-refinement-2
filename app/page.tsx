@@ -221,7 +221,6 @@ export default function AllReportsPage() {
       <div className="flex-shrink-0 px-6 py-4">
         <div className="flex items-center gap-4">
           <h1 className="font-heading text-2xl font-semibold text-foreground flex items-center gap-2 min-w-0 flex-1">
-            <Folder className="size-6 shrink-0 text-foreground" />
             <span className="truncate">All Reports</span>
           </h1>
           <div className="relative w-[320px] flex-none">
