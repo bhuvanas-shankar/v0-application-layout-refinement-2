@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useMemo, useEffect } from "react"
+import { useState, useMemo } from "react"
 import { useRouter, useParams } from "next/navigation"
 import {
   Search,
@@ -14,7 +14,6 @@ import {
   ChevronDown,
   Pencil,
   Trash2,
-  Check,
 } from "lucide-react"
 import {
   Table,
@@ -27,7 +26,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
-import { Textarea } from "@/components/ui/textarea"
 import {
   Select,
   SelectContent,
@@ -49,7 +47,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { cn } from "@/lib/utils"
+import { AddItemModal } from "@/components/add-item-modal"
 
 type RowType = "folder" | "project"
 
@@ -110,19 +108,6 @@ function SortIndicator({ active, direction }: { active: boolean; direction: Sort
 
 type ItemType = "folder" | "project"
 
-const typeMeta: Record<ItemType, { label: string; description: string; icon: typeof Folder }> = {
-  folder: {
-    label: "Folder",
-    description: "Organizes projects and other folders",
-    icon: Folder,
-  },
-  project: {
-    label: "Project",
-    description: "Contains reports directly",
-    icon: FolderOpen,
-  },
-}
-
 export default function FolderViewPage() {
   const router = useRouter()
   const params = useParams()
@@ -140,19 +125,6 @@ export default function FolderViewPage() {
   const [isRenameOpen, setIsRenameOpen] = useState(false)
   const [renamingRow, setRenamingRow] = useState<FolderRow | null>(null)
   const [renameValue, setRenameValue] = useState("")
-
-  // Add modal local state
-  const [addType, setAddType] = useState<ItemType>("folder")
-  const [addName, setAddName] = useState("")
-  const [addDescription, setAddDescription] = useState("")
-
-  useEffect(() => {
-    if (isAddOpen) {
-      setAddType("folder")
-      setAddName("")
-      setAddDescription("")
-    }
-  }, [isAddOpen])
 
   // Filter rows by name (case-insensitive, real time)
   const filteredRows = useMemo(() => {
@@ -206,14 +178,14 @@ export default function FolderViewPage() {
     }
   }
 
-  const handleAddItem = () => {
-    const trimmed = addName.trim()
+  const handleAddItem = ({ type, name }: { type: ItemType; name: string; description?: string }) => {
+    const trimmed = name.trim()
     if (!trimmed) return
     const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
     const newRow: FolderRow = {
       id: String(Date.now()),
       name: trimmed,
-      type: addType,
+      type,
       items: 0,
       lastUpdated: today,
       created: today,
@@ -246,8 +218,6 @@ export default function FolderViewPage() {
     setIsRenameOpen(true)
     setOpenMenuId(null)
   }
-
-  const addNameValid = addName.trim().length > 0
 
   return (
     <div className="flex flex-1 flex-col h-full overflow-hidden">
@@ -461,100 +431,14 @@ export default function FolderViewPage() {
       </div>
 
       {/* Add new Modal */}
-      <Dialog open={isAddOpen} onOpenChange={setIsAddOpen}>
-        <DialogContent showCloseButton={false} className="sm:max-w-[480px]">
-          <DialogHeader>
-            <DialogTitle>Add new</DialogTitle>
-          </DialogHeader>
-
-          <div className="space-y-5 py-2">
-            {/* Type selector cards — stacked vertically */}
-            <div className="space-y-2">
-              {(["folder", "project"] as ItemType[]).map((t) => {
-                const meta = typeMeta[t]
-                const Icon = meta.icon
-                const selected = addType === t
-                return (
-                  <button
-                    key={t}
-                    type="button"
-                    onClick={() => setAddType(t)}
-                    className={cn(
-                      "relative flex w-full items-center gap-3 rounded-lg p-4 text-left transition-colors",
-                      selected
-                        ? "border-2 border-[var(--quire-black)] bg-muted/50"
-                        : "border-[0.5px] border-border hover:bg-muted/30",
-                    )}
-                    aria-pressed={selected}
-                  >
-                    <Icon className="size-6 shrink-0 text-foreground" />
-                    <span className="flex-1 min-w-0">
-                      <span className="block text-sm font-medium text-foreground">{meta.label}</span>
-                      <span className="block text-xs text-muted-foreground">{meta.description}</span>
-                    </span>
-                    {/* Radio indicator top right */}
-                    <span
-                      className={cn(
-                        "flex size-4 shrink-0 items-center justify-center rounded-full border",
-                        selected ? "border-[var(--quire-black)] bg-[var(--quire-black)]" : "border-border",
-                      )}
-                    >
-                      {selected && <Check className="size-2.5 text-white" />}
-                    </span>
-                  </button>
-                )
-              })}
-            </div>
-
-            {/* Name field */}
-            <div className="space-y-2">
-              <Label htmlFor="add-name" className="text-sm font-medium">
-                Name
-              </Label>
-              <Input
-                id="add-name"
-                placeholder="Enter a name..."
-                value={addName}
-                onChange={(e) => setAddName(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && addNameValid) handleAddItem()
-                }}
-                className="focus-visible:ring-[var(--quire-yellow)] focus-visible:border-[var(--quire-yellow)]"
-                autoFocus
-              />
-              <p className="text-sm text-muted-foreground">
-                {typeMeta[addType].label} will be added to {folderName}
-              </p>
-            </div>
-
-            {/* Description field — projects only */}
-            {addType === "project" && (
-              <div className="space-y-2">
-                <Label htmlFor="add-description" className="text-sm font-medium">
-                  Description
-                </Label>
-                <Textarea
-                  id="add-description"
-                  placeholder="Enter a description..."
-                  value={addDescription}
-                  onChange={(e) => setAddDescription(e.target.value)}
-                  rows={3}
-                  className="resize-none focus-visible:ring-[var(--quire-yellow)] focus-visible:border-[var(--quire-yellow)]"
-                />
-              </div>
-            )}
-          </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={handleAddItem} disabled={!addNameValid}>
-              Add
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <AddItemModal
+        open={isAddOpen}
+        onOpenChange={setIsAddOpen}
+        allowedTypes={["folder", "project"]}
+        defaultType="folder"
+        location={folderName}
+        onCreate={handleAddItem}
+      />
 
       {/* Rename Modal */}
       <Dialog open={isRenameOpen} onOpenChange={setIsRenameOpen}>
