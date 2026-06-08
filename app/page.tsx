@@ -6,6 +6,7 @@ import {
   Search,
   Folder,
   FolderOpen,
+  SearchX,
   MoreVertical,
   ChevronLeft,
   ChevronRight,
@@ -282,7 +283,7 @@ export default function AllReportsPage() {
         <div className="flex-1 overflow-y-auto folder-list-scroll">
           {paginatedRows.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-16">
-              <FolderOpen className="size-12 text-muted-foreground/50 mb-3" />
+              <SearchX className="size-12 text-muted-foreground/50 mb-3" />
               <span className="text-muted-foreground">Nothing here yet</span>
             </div>
           ) : (

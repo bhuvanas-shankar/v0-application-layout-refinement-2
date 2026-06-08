@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react"
 import { useParams, useSearchParams } from "next/navigation"
-import { Search, ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown, FileText, FileSearch, FolderOpen, X } from "lucide-react"
+import { Search, ChevronLeft, ChevronRight, ChevronsUpDown, ChevronUp, ChevronDown, FileText, SearchX, FolderOpen, X } from "lucide-react"
 import {
   Table,
   TableBody,
@@ -297,7 +297,7 @@ export default function ProjectFolderViewPage() {
         <div className="flex-1 overflow-y-auto folder-list-scroll">
           {sortedReports.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-16">
-              <FileSearch className="size-12 text-muted-foreground/50 mb-3" />
+              <SearchX className="size-12 text-muted-foreground/50 mb-3" />
               <span className="text-muted-foreground">Nothing here yet</span>
             </div>
           ) : (
