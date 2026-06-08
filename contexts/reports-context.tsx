@@ -516,7 +516,7 @@ export function ReportsProvider({ children }: { children: ReactNode }) {
     const trimmed = name.trim()
     if (!trimmed) return
     const meta = makeMeta(trimmed)
-    const newItem: Item = { id: String(Date.now()), name: trimmed, type, ...meta, created: today }
+    const newItem: Item = { id: String(Date.now()), name: trimmed, type, ...meta, created: today, createdBy: "John Doe" }
     if (parentName === ROOT_PARENT) {
       setRootItems((prev) => [newItem, ...prev])
     } else {
@@ -598,7 +598,7 @@ export function ReportsProvider({ children }: { children: ReactNode }) {
       status: "Draft",
       complete: 0,
       lastModified: today,
-      modifiedBy: "Current User",
+      modifiedBy: "John Doe",
     }
     const key = `${parentName || ROOT_PARENT}/${projectName}`
     setReportsByPath((prev) => ({ ...prev, [key]: [newReport, ...(prev[key] || [])] }))
