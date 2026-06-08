@@ -249,9 +249,9 @@ export default function ProjectFolderViewPage() {
             </SelectContent>
           </Select>
 
-          {/* Right: disabled Add Report button */}
+          {/* Right: disabled Add button */}
           <Button disabled className="w-[130px] shrink-0 opacity-50 cursor-not-allowed">
-            Add Report
+            Add
           </Button>
         </div>
       </div>
