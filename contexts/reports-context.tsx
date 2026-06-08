@@ -221,14 +221,7 @@ const yearProjectNames: Record<string, string[]> = {
     "Risk Assessment - Brownfield Site",
     "Cultural Resources Survey - Heritage Park",
   ],
-  "2018 Reports": [
-    "Phase I ESA - Retail Center Expansion",
-    "Phase II ESA - Chemical Storage Facility",
-    "Lead Paint Survey - School District Buildings",
-    "Vapor Intrusion Assessment - Office Complex",
-    "Remediation Report - Dry Cleaner Site",
-    "Stormwater Management Plan - Mixed Use Development",
-  ],
+  "2018 Reports": [],
   "2019 Reports": [
     "Phase I ESA - Logistics Center",
     "Asbestos Abatement Plan - Power Plant",

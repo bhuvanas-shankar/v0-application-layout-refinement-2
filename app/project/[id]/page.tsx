@@ -298,7 +298,7 @@ export default function ProjectFolderViewPage() {
           {sortedReports.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full py-16">
               <FileSearch className="size-12 text-muted-foreground/50 mb-3" />
-              <span className="text-muted-foreground">No reports found</span>
+              <span className="text-muted-foreground">Nothing here yet</span>
             </div>
           ) : (
             <Table className="table-fixed w-full">
