@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
-import { useReports } from "@/contexts/reports-context"
+import { useReports, ROOT_PARENT } from "@/contexts/reports-context"
 
 type SortField = "name" | "status" | "complete" | "lastModified" | "modifiedBy" | null
 type SortDirection = "asc" | "desc"
@@ -118,7 +118,9 @@ export default function ProjectFolderViewPage() {
   const params = useParams()
   const searchParams = useSearchParams()
   const projectName = decodeURIComponent(params.id as string)
-  const folderName = searchParams.get("folder") ? decodeURIComponent(searchParams.get("folder") as string) : "2015 Reports"
+  // Root-level projects have no ?folder= param — they live under ROOT_PARENT.
+  const folderParam = searchParams.get("folder")
+  const folderName = folderParam ? decodeURIComponent(folderParam) : ROOT_PARENT
   
   const { getReportsForProject, getSort, setSort } = useReports()
   const reports = getReportsForProject(folderName, projectName)
@@ -139,7 +141,7 @@ export default function ProjectFolderViewPage() {
       const matchesStatus = statusFilter === "all" || report.status === statusFilter
       return matchesSearch && matchesStatus
     })
-  }, [searchQuery, statusFilter])
+  }, [searchQuery, statusFilter, reports])
 
   // Sort reports
   const sortedReports = useMemo(() => {

@@ -50,53 +50,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { AddItemModal } from "@/components/add-item-modal"
-import { useReports } from "@/contexts/reports-context"
+import { useReports, type ItemWithCounts } from "@/contexts/reports-context"
 
-type RowType = "folder" | "project"
-
-interface FolderRow {
-  id: string
-  name: string
-  type: RowType
-  items: number
-  lastUpdated: string
-  created: string
-  createdBy: string
-}
+type FolderRow = ItemWithCounts
 
 type SortField = "name" | "lastUpdated" | "created"
 type SortDirection = "asc" | "desc"
-
-const SEED_ROWS: FolderRow[] = [
-  { id: "1", name: "Phase II ESA - Industrial Site A", type: "project", items: 30, lastUpdated: "Dec 18, 2015", created: "Jan 5, 2015", createdBy: "Amanda Foster" },
-  { id: "2", name: "Phase I ESA - 4400 Harbor Boulevard", type: "project", items: 6, lastUpdated: "Nov 14, 2015", created: "Mar 12, 2015", createdBy: "Rachel Green" },
-  { id: "3", name: "ESA Sub-folder 2014", type: "folder", items: 6, lastUpdated: "Nov 1, 2014", created: "Oct 14, 2014", createdBy: "Sarah Chen" },
-  { id: "4", name: "Phase I ESA - Oakwood Business Park", type: "project", items: 3, lastUpdated: "Oct 30, 2015", created: "Feb 4, 2015", createdBy: "Sarah Chen" },
-  { id: "5", name: "Phase I ESA - 1200 Riverside Drive", type: "project", items: 5, lastUpdated: "Oct 12, 2015", created: "Apr 18, 2015", createdBy: "Emily Watson" },
-  { id: "6", name: "Archived Projects 2014", type: "folder", items: 8, lastUpdated: "Oct 14, 2014", created: "Aug 18, 2014", createdBy: "Rachel Green" },
-  { id: "7", name: "Phase I ESA - Former Dry Cleaner Site", type: "project", items: 6, lastUpdated: "Sep 28, 2015", created: "Jan 22, 2015", createdBy: "James Liu" },
-  { id: "8", name: "Phase II ESA - Riverfront Redevelopment", type: "project", items: 8, lastUpdated: "Sep 10, 2015", created: "Jun 21, 2015", createdBy: "Rachel Green" },
-  { id: "9", name: "ESA Sub-folder 2013", type: "folder", items: 4, lastUpdated: "Oct 28, 2014", created: "Sep 3, 2013", createdBy: "Michael Torres" },
-  { id: "10", name: "Asbestos Survey - City Hall Annex", type: "project", items: 8, lastUpdated: "Aug 25, 2015", created: "Aug 22, 2015", createdBy: "Sarah Chen" },
-  { id: "11", name: "Asbestos Survey - Lincoln Elementary School", type: "project", items: 8, lastUpdated: "Aug 8, 2015", created: "Apr 17, 2015", createdBy: "James Liu" },
-  { id: "12", name: "Archived Projects 2013", type: "folder", items: 5, lastUpdated: "Sep 30, 2014", created: "Jul 2, 2013", createdBy: "Emily Watson" },
-  { id: "13", name: "Asbestos Survey - Harborview Community Center", type: "project", items: 5, lastUpdated: "Jul 22, 2015", created: "Feb 28, 2015", createdBy: "Michael Torres" },
-  { id: "14", name: "Lead Paint Assessment - 800 Commerce Street", type: "project", items: 4, lastUpdated: "Jul 6, 2015", created: "May 10, 2015", createdBy: "Emily Watson" },
-  { id: "15", name: "Lead Paint Assessment - Municipal Services Building", type: "project", items: 7, lastUpdated: "Jun 19, 2015", created: "Dec 18, 2014", createdBy: "Emily Watson" },
-  { id: "16", name: "Mold Assessment - Westfield Office Complex", type: "project", items: 8, lastUpdated: "Jun 3, 2015", created: "Apr 9, 2015", createdBy: "Michael Torres" },
-  { id: "17", name: "Soil Contamination Study - Mill Road Corridor", type: "project", items: 7, lastUpdated: "May 18, 2015", created: "Aug 4, 2015", createdBy: "Emily Watson" },
-  { id: "18", name: "Soil Contamination Study - East Industrial Depot", type: "project", items: 8, lastUpdated: "May 1, 2015", created: "May 4, 2015", createdBy: "Emily Watson" },
-  { id: "19", name: "Remediation Report - Bayside Manufacturing", type: "project", items: 8, lastUpdated: "Apr 15, 2015", created: "Feb 28, 2015", createdBy: "Rachel Green" },
-  { id: "20", name: "Remediation Report - North County Landfill", type: "project", items: 8, lastUpdated: "Mar 30, 2015", created: "Jan 6, 2015", createdBy: "David Kim" },
-  { id: "21", name: "Groundwater Monitoring - Eastside Plume", type: "project", items: 8, lastUpdated: "Mar 13, 2015", created: "May 1, 2015", createdBy: "Sarah Chen" },
-  { id: "22", name: "Groundwater Monitoring - Former Gas Station Network", type: "project", items: 4, lastUpdated: "Feb 25, 2015", created: "Nov 14, 2014", createdBy: "Amanda Foster" },
-  { id: "23", name: "Air Quality Monitoring - Port District Q1", type: "project", items: 8, lastUpdated: "Feb 9, 2015", created: "Dec 17, 2014", createdBy: "Emily Watson" },
-  { id: "24", name: "Air Quality Monitoring - Port District Q2", type: "project", items: 8, lastUpdated: "Jan 23, 2015", created: "Jun 17, 2014", createdBy: "James Liu" },
-  { id: "25", name: "Wetlands Delineation - Creekside Development", type: "project", items: 8, lastUpdated: "Jan 7, 2015", created: "Aug 24, 2014", createdBy: "James Liu" },
-  { id: "26", name: "Wetlands Delineation - Highway 9 Expansion Zone", type: "project", items: 6, lastUpdated: "Dec 18, 2014", created: "Jun 17, 2014", createdBy: "James Liu" },
-  { id: "27", name: "NEPA Review - Regional Transit Corridor", type: "project", items: 8, lastUpdated: "Dec 1, 2014", created: "Nov 20, 2014", createdBy: "David Kim" },
-  { id: "28", name: "Cultural Resources Survey - Old Town District", type: "project", items: 8, lastUpdated: "Nov 14, 2014", created: "Nov 20, 2014", createdBy: "David Kim" },
-]
 
 // Avatar color schemes using Quire design tokens with optimal contrast
 const avatarColors: Array<{ bg: string; text: string }> = [
@@ -145,10 +104,10 @@ export default function FolderViewPage() {
   const router = useRouter()
   const params = useParams()
   const folderName = decodeURIComponent(params.id as string)
-  const { getSort, setSort } = useReports()
+  const { getFolderItems, addItem, renameItem, deleteItem, getSort, setSort } = useReports()
   const sortKey = `folder:${folderName}`
 
-  const [rows, setRows] = useState<FolderRow[]>(SEED_ROWS)
+  const rows = getFolderItems(folderName)
   const [searchQuery, setSearchQuery] = useState("")
   const [rowsPerPage, setRowsPerPage] = useState(25)
   const [currentPage, setCurrentPage] = useState(1)
@@ -218,34 +177,22 @@ export default function FolderViewPage() {
   const handleAddItem = ({ type, name }: { type: ItemType; name: string; description?: string }) => {
     const trimmed = name.trim()
     if (!trimmed) return
-    const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-    const newRow: FolderRow = {
-      id: String(Date.now()),
-      name: trimmed,
-      type,
-      items: 0,
-      lastUpdated: today,
-      created: today,
-      createdBy: "John Doe",
-    }
-    setRows((prev) => [newRow, ...prev])
+    addItem(folderName, trimmed, type)
     setCurrentPage(1)
     setIsAddOpen(false)
   }
 
   const handleRenameRow = () => {
     if (renamingRow && renameValue.trim()) {
-      setRows((prev) =>
-        prev.map((row) => (row.id === renamingRow.id ? { ...row, name: renameValue.trim() } : row))
-      )
+      renameItem(folderName, renamingRow.name, renameValue.trim())
     }
     setIsRenameOpen(false)
     setRenamingRow(null)
     setRenameValue("")
   }
 
-  const handleDeleteRow = (id: string) => {
-    setRows((prev) => prev.filter((row) => row.id !== id))
+  const handleDeleteRow = (name: string) => {
+    deleteItem(folderName, name)
     setOpenMenuId(null)
   }
 
@@ -437,7 +384,7 @@ export default function FolderViewPage() {
                             {row.items === 0 && (
                               <DropdownMenuItem
                                 variant="destructive"
-                                onClick={() => handleDeleteRow(row.id)}
+                                onClick={() => handleDeleteRow(row.name)}
                               >
                                 <Trash2 className="size-4" />
                                 Delete

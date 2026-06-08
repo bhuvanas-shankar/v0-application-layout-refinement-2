@@ -50,57 +50,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { AddItemModal, type ItemType } from "@/components/add-item-modal"
-import { useReports } from "@/contexts/reports-context"
+import { useReports, ROOT_PARENT, type ItemWithCounts } from "@/contexts/reports-context"
 
-type RowType = "folder" | "project"
-
-interface ReportRow {
-  id: string
-  name: string
-  type: RowType
-  items: number
-  lastUpdated: string
-  created: string
-  createdBy: string
-}
+type ReportRow = ItemWithCounts
 
 type SortField = "name" | "lastUpdated" | "created"
 type SortDirection = "asc" | "desc"
-
-const SEED_ROWS: ReportRow[] = [
-  { id: "1", name: "Brownfield Redevelopment - Site 4", type: "project", items: 8, lastUpdated: "Jan 15, 2026", created: "Mar 3, 2020", createdBy: "Sarah Chen" },
-  { id: "2", name: "2015 Reports", type: "folder", items: 28, lastUpdated: "Jan 22, 2016", created: "Jun 14, 2014", createdBy: "Rachel Green" },
-  { id: "3", name: "2016 Reports", type: "folder", items: 12, lastUpdated: "Jan 28, 2017", created: "Apr 11, 2016", createdBy: "Emily Watson" },
-  { id: "4", name: "Former Rail Yard Assessment", type: "project", items: 12, lastUpdated: "Dec 2, 2025", created: "Jun 14, 2019", createdBy: "Michael Torres" },
-  { id: "5", name: "2017 Reports", type: "folder", items: 8, lastUpdated: "Jan 23, 2018", created: "Jun 12, 2014", createdBy: "Amanda Foster" },
-  { id: "6", name: "2018 Reports", type: "folder", items: 6, lastUpdated: "Jan 4, 2019", created: "Apr 9, 2017", createdBy: "Michael Torres" },
-  { id: "7", name: "Coastal Wetlands Restoration Project", type: "project", items: 5, lastUpdated: "Nov 18, 2025", created: "Sep 22, 2021", createdBy: "James Liu" },
-  { id: "8", name: "2019 Reports", type: "folder", items: 7, lastUpdated: "Jan 12, 2020", created: "Jun 10, 2015", createdBy: "James Liu" },
-  { id: "9", name: "2020 Reports", type: "folder", items: 5, lastUpdated: "Dec 5, 2020", created: "Jan 8, 2018", createdBy: "Sarah Chen" },
-  { id: "10", name: "2021 Reports", type: "folder", items: 9, lastUpdated: "Jan 20, 2022", created: "Mar 9, 2016", createdBy: "Michael Torres" },
-  { id: "11", name: "2022 Reports", type: "folder", items: 7, lastUpdated: "Jan 18, 2023", created: "May 10, 2014", createdBy: "James Liu" },
-  { id: "12", name: "2023 Reports", type: "folder", items: 8, lastUpdated: "Jan 7, 2024", created: "Nov 3, 2022", createdBy: "James Liu" },
-  { id: "13", name: "2024 Reports", type: "folder", items: 6, lastUpdated: "Dec 22, 2024", created: "Jan 4, 2020", createdBy: "Emily Watson" },
-  { id: "14", name: "2025 Reports", type: "folder", items: 3, lastUpdated: "Dec 8, 2025", created: "Mar 5, 2018", createdBy: "Amanda Foster" },
-  { id: "15", name: "2026 Reports", type: "folder", items: 2, lastUpdated: "Mar 1, 2026", created: "Jan 10, 2024", createdBy: "Sarah Chen" },
-  { id: "16", name: "Deep Dive Training Folder", type: "folder", items: 8, lastUpdated: "Mar 22, 2025", created: "Feb 14, 2019", createdBy: "Michael Torres" },
-  { id: "17", name: "Demo Folder", type: "folder", items: 12, lastUpdated: "Feb 28, 2025", created: "Aug 3, 2017", createdBy: "Rachel Green" },
-  { id: "18", name: "ESA Portfolio", type: "folder", items: 9, lastUpdated: "Dec 1, 2024", created: "May 6, 2016", createdBy: "Emily Watson" },
-  { id: "19", name: "Phase I Inspections", type: "folder", items: 14, lastUpdated: "Nov 10, 2024", created: "Sep 18, 2015", createdBy: "James Liu" },
-  { id: "20", name: "Asbestos Surveys", type: "folder", items: 6, lastUpdated: "Oct 5, 2024", created: "Mar 22, 2016", createdBy: "Sarah Chen" },
-  { id: "21", name: "Phase II Investigations", type: "folder", items: 7, lastUpdated: "Sep 18, 2024", created: "Jul 4, 2015", createdBy: "Amanda Foster" },
-  { id: "22", name: "Soil Contamination Studies", type: "folder", items: 5, lastUpdated: "Aug 3, 2024", created: "Dec 9, 2016", createdBy: "Michael Torres" },
-  { id: "23", name: "Hazmat Assessments", type: "folder", items: 3, lastUpdated: "Jul 22, 2024", created: "Apr 17, 2015", createdBy: "Rachel Green" },
-  { id: "24", name: "NEPA Reviews", type: "folder", items: 5, lastUpdated: "Feb 20, 2024", created: "Oct 2, 2014", createdBy: "Emily Watson" },
-  { id: "25", name: "Wetlands Delineation", type: "folder", items: 3, lastUpdated: "Jan 8, 2024", created: "Jun 28, 2015", createdBy: "James Liu" },
-  { id: "26", name: "Stormwater Management", type: "folder", items: 7, lastUpdated: "Dec 15, 2023", created: "Feb 11, 2016", createdBy: "Sarah Chen" },
-  { id: "27", name: "Cultural Resources", type: "folder", items: 4, lastUpdated: "Nov 2, 2023", created: "Aug 14, 2014", createdBy: "Amanda Foster" },
-  { id: "28", name: "Noise Impact Studies", type: "folder", items: 2, lastUpdated: "Oct 19, 2023", created: "Mar 30, 2017", createdBy: "Michael Torres" },
-  { id: "29", name: "Traffic Impact Assessments", type: "folder", items: 6, lastUpdated: "Sep 7, 2023", created: "Nov 5, 2015", createdBy: "Rachel Green" },
-  { id: "30", name: "Geotechnical Reports", type: "folder", items: 11, lastUpdated: "Aug 24, 2023", created: "Jan 19, 2016", createdBy: "Emily Watson" },
-  { id: "31", name: "Air Quality Reports", type: "folder", items: 6, lastUpdated: "Apr 11, 2024", created: "Jul 7, 2014", createdBy: "James Liu" },
-  { id: "32", name: "Remediation Projects", type: "folder", items: 9, lastUpdated: "Mar 5, 2024", created: "Sep 22, 2015", createdBy: "Sarah Chen" },
-]
 
 // Avatar color schemes using Quire design tokens with optimal contrast
 const avatarColors: Array<{ bg: string; text: string }> = [
@@ -145,8 +100,8 @@ function SortIndicator({ active, direction }: { active: boolean; direction: Sort
 
 export default function AllReportsPage() {
   const router = useRouter()
-  const { getSort, setSort } = useReports()
-  const [rows, setRows] = useState<ReportRow[]>(SEED_ROWS)
+  const { getRootItems, addItem, renameItem, deleteItem, getSort, setSort } = useReports()
+  const rows = getRootItems()
   const [searchQuery, setSearchQuery] = useState("")
   const [rowsPerPage, setRowsPerPage] = useState(25)
   const [currentPage, setCurrentPage] = useState(1)
@@ -214,33 +169,21 @@ export default function AllReportsPage() {
   }
 
   const handleAddItem = ({ type, name }: { type: ItemType; name: string; description?: string }) => {
-    const today = new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })
-    const newRow: ReportRow = {
-      id: String(Date.now()),
-      name: name.trim(),
-      type,
-      items: 0,
-      lastUpdated: today,
-      created: today,
-      createdBy: "John Doe",
-    }
-    setRows((prev) => [newRow, ...prev])
+    addItem(ROOT_PARENT, name, type)
     setCurrentPage(1)
   }
 
   const handleRenameRow = () => {
     if (renamingRow && renameValue.trim()) {
-      setRows((prev) =>
-        prev.map((row) => (row.id === renamingRow.id ? { ...row, name: renameValue.trim() } : row))
-      )
+      renameItem(ROOT_PARENT, renamingRow.name, renameValue.trim())
     }
     setIsRenameOpen(false)
     setRenamingRow(null)
     setRenameValue("")
   }
 
-  const handleDeleteRow = (id: string) => {
-    setRows((prev) => prev.filter((row) => row.id !== id))
+  const handleDeleteRow = (name: string) => {
+    deleteItem(ROOT_PARENT, name)
     setOpenMenuId(null)
   }
 
@@ -428,7 +371,7 @@ export default function AllReportsPage() {
                             {row.items === 0 && (
                               <DropdownMenuItem
                                 variant="destructive"
-                                onClick={() => handleDeleteRow(row.id)}
+                                onClick={() => handleDeleteRow(row.name)}
                               >
                                 <Trash2 className="size-4" />
                                 Delete
