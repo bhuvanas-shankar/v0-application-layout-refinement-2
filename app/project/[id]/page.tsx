@@ -250,7 +250,7 @@ export default function ProjectFolderViewPage() {
           </Select>
 
           {/* Right: disabled Add button */}
-          <Button disabled className="w-[130px] shrink-0 opacity-50 cursor-not-allowed">
+          <Button disabled className="flex-none opacity-50 cursor-not-allowed">
             Add
           </Button>
         </div>
