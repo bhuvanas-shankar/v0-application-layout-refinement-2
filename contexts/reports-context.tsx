@@ -294,7 +294,7 @@ const yearProjectNames: Record<string, string[]> = {
 const rootProjectSeeds: Array<{ name: string; reports: number; year: number }> = [
   { name: "Brownfield Redevelopment - Site 4", reports: 8, year: 2024 },
   { name: "Former Rail Yard Assessment", reports: 12, year: 2023 },
-  { name: "Coastal Wetlands Restoration Project", reports: 5, year: 2025 },
+  { name: "Coastal Wetlands Restoration Project", reports: 0, year: 2025 },
 ]
 
 // Themed folders that get deterministically generated project children.
@@ -430,7 +430,15 @@ function buildSeed(): SeedResult {
     })
   })
 
-  return { rootItems, childrenByParent, reportsByPath }
+  // Pin "2015 Reports" and "2016 Reports" to the top of the root listing.
+  const pinnedNames = ["2015 Reports", "2016 Reports"]
+  const pinned = pinnedNames
+    .map((name) => rootItems.find((item) => item.name === name))
+    .filter((item): item is Item => Boolean(item))
+  const rest = rootItems.filter((item) => !pinnedNames.includes(item.name))
+  const orderedRootItems = [...pinned, ...rest]
+
+  return { rootItems: orderedRootItems, childrenByParent, reportsByPath }
 }
 
 const SEED = buildSeed()
