@@ -1,0 +1,215 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* Quire Brand Colors */
+  --quire-navy: #221A4E;
+  --quire-navy-light: #2D2460;
+  --quire-yellow: #FFC146;
+  --quire-canvas: #EFEEF6;
+  --quire-border: #D6D3E4;
+  --quire-muted: #6E6790;
+  --quire-chip-bg: #EEEDF5;
+  --quire-table-header: #EEF2FF;
+  --quire-success: #43AA8B;
+  --quire-black: #1A1A1A;
+  --quire-link: #378ADD;
+
+  /* Core tokens */
+  --background: #ffffff;
+  --foreground: #221A4E;
+  --card: #ffffff;
+  --card-foreground: #221A4E;
+  --popover: #ffffff;
+  --popover-foreground: #221A4E;
+  --primary: #221A4E;
+  --primary-foreground: #ffffff;
+  --secondary: #EEEDF5;
+  --secondary-foreground: #6E6790;
+  --muted: #EEEDF5;
+  --muted-foreground: #6E6790;
+  --accent: #FFC146;
+  --accent-foreground: #221A4E;
+  --destructive: oklch(0.577 0.245 27.325);
+  --destructive-foreground: #ffffff;
+  --border: #D6D3E4;
+  --input: #D6D3E4;
+  --ring: #221A4E;
+  --chart-1: #43AA8B;
+  --chart-2: #FFC146;
+  --chart-3: #221A4E;
+  --chart-4: #6E6790;
+  --chart-5: #D6D3E4;
+  --radius: 0.5rem;
+  
+  /* Sidebar tokens */
+  --sidebar: #EFEEF6;
+  --sidebar-foreground: #221A4E;
+  --sidebar-primary: #FFC146;
+  --sidebar-primary-foreground: #221A4E;
+  --sidebar-accent: #ffffff;
+  --sidebar-accent-foreground: #221A4E;
+  --sidebar-border: #D6D3E4;
+  --sidebar-ring: #FFC146;
+}
+
+.dark {
+  /* Soft white workspace — light-mode feel, lavender undertone */
+  --background: #FAFAFD;
+  --foreground: #221A4E;
+  --card: #ffffff;
+  --card-foreground: #221A4E;
+  --popover: #ffffff;
+  --popover-foreground: #221A4E;
+  --primary: #221A4E;
+  --primary-foreground: #ffffff;
+  --secondary: #F3F2F8;
+  --secondary-foreground: #6E6790;
+  --muted: #F0EFF7;
+  --muted-foreground: #7E7AA0;
+  --accent: #FFC146;
+  --accent-foreground: #221A4E;
+  --destructive: #e05c5c;
+  --destructive-foreground: #ffffff;
+  --border: #E2E0ED;
+  --input: #E2E0ED;
+  --ring: #221A4E;
+  --chart-1: #43AA8B;
+  --chart-2: #FFC146;
+  --chart-3: #221A4E;
+  --chart-4: #e05c5c;
+  --chart-5: #7E7AA0;
+
+  /* Sidebar stays dark — gradient applied via .quire-sidebar-bg */
+  --sidebar: #160E35;
+  --sidebar-foreground: #C8C4E8;
+  --sidebar-primary: #FFC146;
+  --sidebar-primary-foreground: #10101A;
+  --sidebar-accent: rgba(255, 255, 255, 0.06);
+  --sidebar-accent-foreground: #EEF2FF;
+  --sidebar-border: rgba(255, 255, 255, 0.07);
+  --sidebar-ring: #FFC146;
+
+  /* Brand tokens — light workspace */
+  --quire-navy: #221A4E;
+  --quire-navy-light: #2D2460;
+  --quire-canvas: #FAFAFD;
+  --quire-border: #E2E0ED;
+  --quire-muted: #7E7AA0;
+  --quire-chip-bg: #F0EFF7;
+  --quire-table-header: #F5F4FA;
+  --quire-black: #1A1A1A;
+  --quire-link: #378ADD;
+}
+
+@theme inline {
+  --font-sans: var(--font-inter), 'Inter', sans-serif;
+  --font-heading: var(--font-ubuntu), 'Ubuntu', sans-serif;
+  --font-mono: 'Geist Mono', 'Geist Mono Fallback', monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+  
+  /* Quire brand color utilities */
+  --color-quire-navy: var(--quire-navy);
+  --color-quire-navy-light: var(--quire-navy-light);
+  --color-quire-yellow: var(--quire-yellow);
+  --color-quire-canvas: var(--quire-canvas);
+  --color-quire-border: var(--quire-border);
+  --color-quire-muted: var(--quire-muted);
+  --color-quire-chip-bg: var(--quire-chip-bg);
+  --color-quire-table-header: var(--quire-table-header);
+  --color-quire-success: var(--quire-success);
+  --color-quire-black: var(--quire-black);
+  --color-quire-link: var(--quire-link);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-heading);
+  }
+}
+
+/* ─── Dark mode sidebar gradient ───────────────────────────────────────────── */
+/* Applied directly on the .quire-sidebar wrapper inside AppSidebar            */
+
+.dark .quire-sidebar-bg {
+  background: linear-gradient(170deg, #3B3A8C 0%, #221A4E 45%, #160E35 100%);
+}
+
+/* Yellow accent edge — replaces the default border-right in dark mode */
+.dark .quire-sidebar-edge {
+  border-right: 2px solid transparent;
+  border-image: linear-gradient(to bottom, #FFC146 0%, #FFC146 60%, rgba(255, 193, 70, 0) 100%) 1;
+}
+
+/* Quire logo — tinted to brand yellow #FFC146 via CSS filters */
+.quire-logo-yellow {
+  filter: brightness(0) saturate(100%) invert(78%) sepia(60%) saturate(600%) hue-rotate(350deg) brightness(103%) contrast(101%);
+}
+
+/* Table: alternating stripes + hover — handled via className in JSX */
+
+/* Custom scrollbar styling for folder list */
+.folder-list-scroll {
+  scrollbar-gutter: stable;
+}
+
+.folder-list-scroll::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+}
+
+.folder-list-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.folder-list-scroll::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
+
+.folder-list-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--muted-foreground);
+}
