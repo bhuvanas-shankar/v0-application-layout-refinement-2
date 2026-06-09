@@ -48,10 +48,10 @@ export function ContentToolbar() {
                   href="/" 
                   className="flex items-center gap-1.5 text-sm text-quire-link hover:underline"
                 >
-                  All reports
+                  All Reports
                 </Link>
               </TooltipTrigger>
-              <TooltipContent>All reports</TooltipContent>
+              <TooltipContent>All Reports</TooltipContent>
             </Tooltip>
             <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
             <Tooltip>
@@ -74,10 +74,10 @@ export function ContentToolbar() {
                   href="/" 
                   className="flex items-center gap-1.5 text-sm text-quire-link hover:underline"
                 >
-                  All reports
+                  All Reports
                 </Link>
               </TooltipTrigger>
-              <TooltipContent>All reports</TooltipContent>
+              <TooltipContent>All Reports</TooltipContent>
             </Tooltip>
             <ChevronRight className="size-3.5 shrink-0 text-muted-foreground" />
             {folderName && (
